@@ -1,0 +1,19 @@
+{
+  "name": "aoc_2021",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^27.4.3"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "luxon": "^2.1.1"
+  }
+}
