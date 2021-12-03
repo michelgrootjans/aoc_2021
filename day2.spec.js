@@ -1,11 +1,16 @@
 const _ = require('lodash/fp');
 const map = _.map.convert({cap: false});
 
-const forward = distance => state => ({...state, position: state.position + distance});
+const State = (state = {position: 0, depth: 0}) => ({
+  ...state,
+  forward: (distance) => State({...state, position: position + distance}),
+});
 
-const down = depth => state => ({...state, depth: state.depth + depth});
+const forward = distance => state => State({...state, position: state.position + distance});
 
-const up = depth => state => ({...state, depth: state.depth - depth});
+const down = depth => state => State({...state, depth: state.depth + depth});
+
+const up = depth => state => State({...state, depth: state.depth - depth});
 
 const toOperation = (command) => {
   switch (command[0]) {
@@ -15,11 +20,11 @@ const toOperation = (command) => {
   }
 };
 
-const dive = list => {
+const dive = commands => {
   const state = _.flow(
     _.map(toOperation),
-    _.reduce((state, operation) => operation(state), {position: 0, depth: 0})
-  )(list)
+    _.reduce((state, operation) => operation(state), State())
+  )(commands)
   return state.position * state.depth;
 };
 
@@ -40,5 +45,5 @@ describe('dive', () => {
       ['forward', 2],
     ], 15*10],
     [require('./day2.input'), 1840243],
-  ])('case => %d', (list, expectedCount) => expect(dive(list)).toEqual(expectedCount));
+  ])('case => %d', (commands, expectedCount) => expect(dive(commands)).toEqual(expectedCount));
 });
