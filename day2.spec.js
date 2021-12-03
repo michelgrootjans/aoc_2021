@@ -1,22 +1,21 @@
 const _ = require('lodash/fp');
 const map = _.map.convert({cap: false});
 
-const State = (state = {position: 0, depth: 0}) => ({
-  ...state,
-  forward: (distance) => State({...state, position: position + distance}),
-});
-
-const forward = distance => state => State({...state, position: state.position + distance});
-
-const down = depth => state => State({...state, depth: state.depth + depth});
-
-const up = depth => state => State({...state, depth: state.depth - depth});
+const State = (state = {position: 0, depth: 0}) => {
+  const {position, depth} = state;
+  return ({
+    forward: (distance) => State({depth, position: position + distance}),
+    down: (distance) => State({position, depth: depth + distance}),
+    up: (distance) => State({position, depth: depth - distance}),
+    answer: position * depth,
+  });
+};
 
 const toOperation = (command) => {
   switch (command[0]) {
-    case 'forward':return forward(command[1]);
-    case 'down':return down(command[1]);
-    case 'up':return up(command[1]);
+    case 'forward':return state => state.forward(command[1]);
+    case 'down':return state => state.down(command[1]);
+    case 'up':return state => state.up(command[1]);
   }
 };
 
@@ -25,7 +24,7 @@ const dive = commands => {
     _.map(toOperation),
     _.reduce((state, operation) => operation(state), State())
   )(commands)
-  return state.position * state.depth;
+  return state.answer;
 };
 
 describe('dive', () => {
