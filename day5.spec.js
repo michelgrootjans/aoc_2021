@@ -9,7 +9,9 @@ function toPoints(line) {
   } else if (start[1] === end[1]) {
     return range(start[0], end[0]).map(n => [n, start[1]]);
   } else {
-    return []
+    const xValues = range(start[0], end[0])
+    const yValues = range(start[1], end[1])
+    return xValues.map((x, index) => [x, yValues[index]])
   }
 }
 
@@ -44,6 +46,13 @@ describe('hydrothermal venture', () => {
     ]; // lines cross at [1,1]
     expect(overlaps(lines)).toEqual(1)
   });
+  test('two diagonal', () => {
+    const lines = [
+      [[0,0], [2,2]],
+      [[2,0], [0,2]],
+    ]; // lines cross at [1,1]
+    expect(overlaps(lines)).toEqual(1)
+  });
 
   test('aoc input', () => {
     const lines = [
@@ -58,11 +67,11 @@ describe('hydrothermal venture', () => {
       [[0, 0], [8, 8]],
       [[5, 5], [8, 2]],
     ]
-    expect(overlaps(lines)).toEqual(5)
+    expect(overlaps(lines)).toEqual(12)
   });
 
   test('my input', () => {
     const lines = require('./day5.input');
-    expect(overlaps(lines)).toEqual(7414)
+    expect(overlaps(lines)).toEqual(19676)
   });
 });
