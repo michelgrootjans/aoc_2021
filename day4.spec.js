@@ -33,10 +33,13 @@ const bingo = data => {
   return ({
 
     draw: (draws) => {
-      for (const currentDraw of draws) {
-        boards = boards.map(b => b.draw(currentDraw))
-        const winningBoard = boards.find(b => b.winner());
-        if (winningBoard) return winningBoard.sum() * currentDraw;
+      for (const number of draws) {
+        if (boards.length === 1) {
+          boards = boards.map(b => b.draw(number));
+          if(boards[0].winner()) return boards[0].sum() * number;
+        } else {
+          boards = boards.map(b => b.draw(number)).filter(b => !b.winner());
+        }
       }
       return 0;
     }
@@ -86,10 +89,10 @@ describe('dive', () => {
       ]
     ]
 
-    expect(bingo(boards).draw(draws)).toEqual(188 * 24)
+    expect(bingo(boards).draw(draws)).toEqual(148 * 13)
   });
   test('my input', () => {
     const {boards, draws} = require('./day4.input')
-    expect(bingo(boards).draw(draws)).toEqual(49860)
+    expect(bingo(boards).draw(draws)).toEqual(24628)
   });
 });
