@@ -101,10 +101,10 @@ describe('consuption', () => {
       gamma: '10110',
       epsilon: '1001',
       consumption: 198,
+      // o2: '10111',
     })
   });
-  xtest('my input', () => {
-    expect(consumption(require('./day3.input'))).not.toMatchObject({consumption: 58})
-    expect(consumption(require('./day3.input'))).not.toMatchObject({consumption: 14619140})
+  test('my input', () => {
+    expect(consumption(require('./day3.input'))).toMatchObject({consumption: 1025636})
   });
 });
