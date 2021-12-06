@@ -21,7 +21,21 @@ const consumption = values => {
 
   const mostCommonBit1 = mostCommonBit(0);
   const leastCommonBit1 = inverse(mostCommonBit1);
-  const o2 = values.find(x => x[0] === mostCommonBit1) || '0';
+  let o2 = '0';
+
+  let bleh = [...values]
+  console.log({bleh})
+  for (let i = 0; i < bitLength; i++) {
+    const referenceValue = mostCommonBit(i);
+    bleh = bleh.filter(x => x[i] === referenceValue);
+    console.log({referenceValue, bleh})
+    if(bleh.length === 1) {
+      o2 = bleh[0]
+      break
+    }
+
+  }
+
   const co2 = values.find(x => x[0] === leastCommonBit1) || '0';
 
   const rating = parseInt(o2, 2) * parseInt(co2, 2);
@@ -58,12 +72,15 @@ describe('consuption', () => {
   test('three different', () => {
     expect(consumption([
       '11100',
+      '00111',
       '01110',
-      '00111'
     ])).toMatchObject({
       gamma: '01110',
       epsilon: '10001',
       consumption: 0b01110 * 0b10001,
+      o2:  '01110',
+      co2: '11100',
+      rating: 0b01110 * 0b11100,
     });
   });
   test('aoc example', () => {
@@ -80,9 +97,13 @@ describe('consuption', () => {
       '11001',
       '00010',
       '01010',
-    ])).toMatchObject({consumption: 198})
+    ])).toMatchObject({
+      gamma: '10110',
+      epsilon: '1001',
+      consumption: 198,
+    })
   });
-  test('my input', () => {
+  xtest('my input', () => {
     expect(consumption(require('./day3.input'))).not.toMatchObject({consumption: 58})
     expect(consumption(require('./day3.input'))).not.toMatchObject({consumption: 14619140})
   });
