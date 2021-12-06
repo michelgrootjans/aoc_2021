@@ -5,32 +5,33 @@ function inverse(bitAsString) {
   return '0'
 }
 
+function mostCommonBit(index, values) {
+  const zeroes = values.filter(v => v[index] === '0').length;
+  return zeroes > (values.length / 2) ? '0' : '1';
+}
+
 const consumption = values => {
-  function mostCommonBit(index) {
-    const ones = values.filter(v => v[index] === '0').length;
-    return ones > (values.length / 2) ? '0' : '1';
-  }
 
   const bitLength = values[0].length;
   const gamma = range(0, bitLength-1)
-    .map(n => mostCommonBit(n))
+    .map(n => mostCommonBit(n, values))
     .join('')
 
   const epsilon = (parseInt(gamma, 2) ^ parseInt('1'.repeat(bitLength), 2)).toString(2);
   const consumption = parseInt(gamma, 2) * parseInt(epsilon, 2);
 
-  const mostCommonBit1 = mostCommonBit(0);
+  const mostCommonBit1 = mostCommonBit(0, values);
   const leastCommonBit1 = inverse(mostCommonBit1);
   let o2 = '0';
 
-  let bleh = [...values]
-  console.log({bleh})
+  let oxygenValues = [...values]
+  console.log({oxygenValues})
   for (let i = 0; i < bitLength; i++) {
-    const referenceValue = mostCommonBit(i);
-    bleh = bleh.filter(x => x[i] === referenceValue);
-    console.log({referenceValue, bleh})
-    if(bleh.length === 1) {
-      o2 = bleh[0]
+    const referenceValue = mostCommonBit(i, oxygenValues);
+    oxygenValues = oxygenValues.filter(x => x[i] === referenceValue);
+    console.log({referenceValue, oxygenValues})
+    if(oxygenValues.length === 1) {
+      o2 = oxygenValues[0]
       break
     }
 
@@ -101,7 +102,8 @@ describe('consuption', () => {
       gamma: '10110',
       epsilon: '1001',
       consumption: 198,
-      // o2: '10111',
+      o2: '10111',
+      // co2: '01010',
     })
   });
   test('my input', () => {
