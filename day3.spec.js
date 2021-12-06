@@ -2,8 +2,8 @@ const range = require('./Range')
 
 const consumption = values => {
   function mostCommonBit(index) {
-    const ones = values.filter(v => v[index] === '1').length;
-    return ones > (values.length / 2) ? '1' : '0';
+    const ones = values.filter(v => v[index] === '0').length;
+    return ones > (values.length / 2) ? '0' : '1';
   }
 
   const bitLength = values[0].length;
@@ -30,6 +30,15 @@ describe('consuption', () => {
     expect(consumption(['00100', '00100'])).toMatchObject({
       gamma: '00100',
       epsilon: '11011'
+    });
+  });
+  test('two different values', () => {
+    expect(consumption([
+      '1010',
+      '0011'
+    ])).toMatchObject({
+      gamma:   '1011',
+      epsilon:  '100'
     });
   });
   test('three different', () => {
