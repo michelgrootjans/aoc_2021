@@ -23,13 +23,15 @@ describe('consuption', () => {
   test('one value', () => {
     expect(consumption(['00100'])).toMatchObject({
       gamma: '00100',
-      epsilon: '11011'
+      epsilon: '11011',
+      consumption: 0b00100 * 0b11011,
     });
   });
   test('two identical values', () => {
     expect(consumption(['00100', '00100'])).toMatchObject({
       gamma: '00100',
-      epsilon: '11011'
+      epsilon: '11011',
+      consumption: 0b00100 * 0b11011,
     });
   });
   test('two different values', () => {
@@ -38,7 +40,8 @@ describe('consuption', () => {
       '0011'
     ])).toMatchObject({
       gamma:   '1011',
-      epsilon:  '100'
+      epsilon:  '100',
+      consumption: 0b1011 * 0b0100,
     });
   });
   test('three different', () => {
@@ -48,7 +51,8 @@ describe('consuption', () => {
       '00111'
     ])).toMatchObject({
       gamma: '01110',
-      epsilon: '10001'
+      epsilon: '10001',
+      consumption: 0b01110 * 0b10001,
     });
   });
   test('aoc example', () => {
