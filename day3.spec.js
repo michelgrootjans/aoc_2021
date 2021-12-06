@@ -9,6 +9,10 @@ function mostCommonBit(index, values) {
   const zeroes = values.filter(v => v[index] === '0').length;
   return zeroes > (values.length / 2) ? '0' : '1';
 }
+function mostCommonBit2(index, values) {
+  const ones = values.filter(v => v[index] === '1').length;
+  return ones > (values.length / 2) ? '1' : '0';
+}
 
 const consumption = values => {
 
@@ -20,28 +24,30 @@ const consumption = values => {
   const epsilon = (parseInt(gamma, 2) ^ parseInt('1'.repeat(bitLength), 2)).toString(2);
   const consumption = parseInt(gamma, 2) * parseInt(epsilon, 2);
 
-  const mostCommonBit1 = mostCommonBit(0, values);
-  const leastCommonBit1 = inverse(mostCommonBit1);
   let o2 = '0';
-
   let oxygenValues = [...values]
-  console.log({oxygenValues})
   for (let i = 0; i < bitLength; i++) {
     const referenceValue = mostCommonBit(i, oxygenValues);
     oxygenValues = oxygenValues.filter(x => x[i] === referenceValue);
-    console.log({referenceValue, oxygenValues})
     if(oxygenValues.length === 1) {
       o2 = oxygenValues[0]
       break
     }
-
   }
 
-  const co2 = values.find(x => x[0] === leastCommonBit1) || '0';
+  let co2 = '0';
+  let co2Values = [...values]
+  for (let i = 0; i < bitLength; i++) {
+    const referenceValue = inverse(mostCommonBit(i, co2Values));
+    co2Values = co2Values.filter(x => x[i] === referenceValue);
+    if(co2Values.length === 1) {
+      co2 = co2Values[0]
+      break
+    }
+  }
+
 
   const rating = parseInt(o2, 2) * parseInt(co2, 2);
-
-  console.log({values, gamma, epsilon, consumption, o2, co2, rating})
 
   return {gamma, epsilon, consumption, o2, co2, rating};
 };
@@ -103,10 +109,14 @@ describe('consuption', () => {
       epsilon: '1001',
       consumption: 198,
       o2: '10111',
-      // co2: '01010',
+      co2: '01010',
+      rating: 230,
     })
   });
   test('my input', () => {
-    expect(consumption(require('./day3.input'))).toMatchObject({consumption: 1025636})
+    expect(consumption(require('./day3.input'))).toMatchObject({
+      consumption: 1025636,
+      rating: 793873
+    })
   });
 });
