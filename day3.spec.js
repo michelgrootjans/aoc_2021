@@ -1,5 +1,10 @@
 const range = require('./Range')
 
+function inverse(bitAsString) {
+  if(bitAsString === '0') return '1';
+  return '0'
+}
+
 const consumption = values => {
   function mostCommonBit(index) {
     const ones = values.filter(v => v[index] === '0').length;
@@ -12,11 +17,18 @@ const consumption = values => {
     .join('')
 
   const epsilon = (parseInt(gamma, 2) ^ parseInt('1'.repeat(bitLength), 2)).toString(2);
-
   const consumption = parseInt(gamma, 2) * parseInt(epsilon, 2);
-  console.log({gamma, epsilon, consumption})
 
-  return {gamma, epsilon, consumption};
+  const mostCommonBit1 = mostCommonBit(0);
+  const leastCommonBit1 = inverse(mostCommonBit1);
+  const o2 = values.find(x => x[0] === mostCommonBit1) || '0';
+  const co2 = values.find(x => x[0] === leastCommonBit1) || '0';
+
+  const rating = parseInt(o2, 2) * parseInt(co2, 2);
+
+  console.log({values, gamma, epsilon, consumption, o2, co2, rating})
+
+  return {gamma, epsilon, consumption, o2, co2, rating};
 };
 
 describe('consuption', () => {
@@ -25,13 +37,9 @@ describe('consuption', () => {
       gamma: '00100',
       epsilon: '11011',
       consumption: 0b00100 * 0b11011,
-    });
-  });
-  test('two identical values', () => {
-    expect(consumption(['00100', '00100'])).toMatchObject({
-      gamma: '00100',
-      epsilon: '11011',
-      consumption: 0b00100 * 0b11011,
+      o2:  '00100',
+      co2: '0',
+      rating: 0b00100 * 0,
     });
   });
   test('two different values', () => {
@@ -40,8 +48,11 @@ describe('consuption', () => {
       '0011'
     ])).toMatchObject({
       gamma:   '1011',
-      epsilon:  '100',
+      epsilon:   '100',
       consumption: 0b1011 * 0b0100,
+      o2:  '1010',
+      co2: '0011',
+      rating: 0b1010 * 0b0011,
     });
   });
   test('three different', () => {
