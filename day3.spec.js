@@ -1,33 +1,48 @@
+const range = require('./Range')
+
 const consumption = values => {
+  function mostCommonBit(index) {
+    const ones = values.filter(v => v[index] === '1').length;
+    return ones > (values.length / 2) ? '1' : '0';
+  }
 
+  const bitLength = values[0].length;
+  const gamma = range(0, bitLength-1)
+    .map(n => mostCommonBit(n))
+    .join('')
 
-  const gamma = parseInt(values[0], 2);
-  const epsilon = gamma ^ parseInt('11111', 2);
+  const epsilon = (parseInt(gamma, 2) ^ parseInt('1'.repeat(bitLength), 2)).toString(2);
 
-  return {gamma: gamma, epsilon: epsilon, sum: 198};
+  const consumption = parseInt(gamma, 2) * parseInt(epsilon, 2);
+  console.log({gamma, epsilon, consumption})
+
+  return {gamma, epsilon, consumption};
 };
 
 describe('consuption', () => {
   test('one value', () => {
     expect(consumption(['00100'])).toMatchObject({
-      gamma:   parseInt('00100', 2),
-      epsilon: parseInt('11011', 2)});
+      gamma: '00100',
+      epsilon: '11011'
+    });
   });
   test('two identical values', () => {
     expect(consumption(['00100', '00100'])).toMatchObject({
-      gamma:   parseInt('00100', 2),
-      epsilon: parseInt('11011', 2)});
+      gamma: '00100',
+      epsilon: '11011'
+    });
   });
-  xtest('three different', () => {
+  test('three different', () => {
     expect(consumption([
       '11100',
       '01110',
       '00111'
     ])).toMatchObject({
-      gamma:   parseInt('01110', 2),
-      epsilon: parseInt('10001', 2)});
+      gamma: '01110',
+      epsilon: '10001'
+    });
   });
-  test('should aoc example', () => {
+  test('aoc example', () => {
     expect(consumption([
       '00100',
       '11110',
@@ -41,6 +56,10 @@ describe('consuption', () => {
       '11001',
       '00010',
       '01010',
-    ])).toMatchObject({sum: 198})
+    ])).toMatchObject({consumption: 198})
+  });
+  test('my input', () => {
+    expect(consumption(require('./day3.input'))).not.toMatchObject({consumption: 58})
+    expect(consumption(require('./day3.input'))).not.toMatchObject({consumption: 14619140})
   });
 });
