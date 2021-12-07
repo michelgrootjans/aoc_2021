@@ -1,30 +1,24 @@
-const _ = require('lodash/fp');
 const range = require("./Range");
-const map = _.map.convert({cap: false});
 
-function calculateCosumption(distance) {
-  if(distance === 0) return 0;
-  if(distance === 1) return 1;
-  return distance + calculateCosumption(distance-1)
+const cache = {[0]: 0, [1]: 1}
+
+function calculateConsumption(distance) {
+  if (distance in cache) return cache[distance];
+
+  return cache[distance] = distance + calculateConsumption(distance - 1)
 }
 
 function consumptionFor(position, positions) {
   return positions.map(p => Math.abs(p - position))
-    .map(distance => calculateCosumption(distance))
+    .map(distance => calculateConsumption(distance))
     .reduce((acc, consumption) => acc + consumption)
 }
 
 function align(positions) {
-  const minPosition = Math.min(...positions)
-  const maxPosition = Math.max(...positions)
-  const potentialPositions = range(minPosition, maxPosition)
+  const potentialPositions = range(Math.min(...positions), Math.max(...positions))
 
   const potentialConsumptions = potentialPositions.map(position => consumptionFor(position, positions))
-  const minConsumption = Math.min(...potentialConsumptions)
-
-  // console.log({minPosition, maxPosition, potentialPositions, minConsumption})
-
-  return minConsumption;
+  return Math.min(...potentialConsumptions);
 }
 
 describe('crabs', () => {
@@ -36,5 +30,4 @@ describe('crabs', () => {
   ])('horizontal alignment', (input, output) => {
     expect(align(input)).toEqual(output)
   });
-
 });
