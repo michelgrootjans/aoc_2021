@@ -6,11 +6,10 @@ const parseInput = input => {
   const parseSubLine = line => _.flow(
     _.split(' '),
     _.map(normalize),
-    _.filter(_.negate(_.isEmpty))
   )(line);
 
   const parseLine = line => _.flow(
-    _.split('|'),
+    _.split(' | '),
     _.map(parseSubLine),
   )(line);
 
@@ -78,11 +77,11 @@ const crack = line => {
   const eight = code.find(digits => digits.length === 7)
 
   const two = code.find(digits => digits.length === 5 && minus(digits, four).length === 3)
-  const three = code.find(digits => digits.length === 5 && contains(digits, one))
+  const three = code.find(digits => digits.length === 5 && minus(digits, one).length === 3)
   const five = code.find(digits => digits.length === 5 && ![two, three].includes(digits))
 
   const six = code.find(digits => digits.length === 6 && minus(digits, one).length === 5)
-  const nine = code.find(digits => digits.length === 6 && contains(digits, four))
+  const nine = code.find(digits => digits.length === 6 && minus(digits, four).length === 2)
   const zero = code.find(digits => digits.length === 6 && ![six, nine].includes(digits))
 
   return {
