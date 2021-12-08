@@ -1,9 +1,11 @@
 const _ = require("lodash/fp");
 
 const parseInput = input => {
+  const normalize = value => value.trim().split('').sort().join('');
+
   const parseSubLine = line => _.flow(
     _.split(' '),
-    _.map(_.trim),
+    _.map(normalize),
     _.filter(_.negate(_.isEmpty))
   )(line);
 
@@ -83,31 +85,24 @@ const crack = line => {
   const nine = code.find(word => word.length === 6 && contains(word, four))
   const zero = code.find(word => word.length === 6 && ![six, nine].includes(word))
 
-  const solution = {}
-  solution[zero.split('').sort().join('')] = 0
-  solution[one.split('').sort().join('')] = 1
-  solution[two.split('').sort().join('')] = 2
-  solution[three.split('').sort().join('')] = 3
-  solution[four.split('').sort().join('')] = 4
-  solution[five.split('').sort().join('')] = 5
-  solution[six.split('').sort().join('')] = 6
-  solution[seven.split('').sort().join('')] = 7
-  solution[eight.split('').sort().join('')] = 8
-  solution[nine.split('').sort().join('')] = 9
-
-  return solution;
-};
-
-const findDigit = (word, dictionary) => {
-  const sortedWord = word.split('').sort().join('');
-  return dictionary[sortedWord];
+  return {
+    [zero]: 0,
+    [one]: 1,
+    [two]: 2,
+    [three]: 3,
+    [four]: 4,
+    [five]: 5,
+    [six]: 6,
+    [seven]: 7,
+    [eight]: 8,
+    [nine]: 9
+  };
 };
 
 const solve = input => {
   return _.flow(
     _.map(line => ({line, dictionary: crack(line)})),
-    _.map(tuple => tuple.line[1].map(word => findDigit(word, tuple.dictionary))),
-    // _.tap(console.log),
+    _.map(tuple => tuple.line[1].map(word => tuple.dictionary[word])),
     _.map(numbers => numbers[0] * 1000 + numbers[1] * 100 + numbers[2] * 10 + numbers[3]),
     _.sum,
   )(input)
