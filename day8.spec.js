@@ -18,21 +18,21 @@ const parseInput = input => {
   )(input);
 };
 
-const convert = line => {
-  return line.map(word => word.length)
-    .filter(length => [2, 3, 4, 7].includes(length))
-    .length
-};
+const countSimpleDigits = input => {
+  const sumSimpleDigits = line => {
+    return line.map(word => word.length)
+      .filter(length => [2, 3, 4, 7].includes(length))
+      .length
+  };
 
-const countDigits = input => {
   return _.flow(
     _.map(line => line[1]),
-    _.map(line => convert(line)),
+    _.map(sumSimpleDigits),
     _.sum,
   )(input)
 };
 
-const aocExample = parseInput('' +
+const aocExample = '' +
   'be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe\n' +
   'edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc\n' +
   'fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg\n' +
@@ -42,22 +42,22 @@ const aocExample = parseInput('' +
   'dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe\n' +
   'bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef\n' +
   'egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb\n' +
-  'gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce'
-);
+  'gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce';
 
 describe('count 1, 4, 7, 8', () => {
   test('simple example', () => {
     const input = parseInput('be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe');
-    expect(countDigits(input)).toEqual(2)
+    expect(countSimpleDigits(input)).toEqual(2)
   });
 
   test('aoc example', () => {
-    expect(countDigits(aocExample)).toEqual(26)
+    const input = parseInput(aocExample);
+    expect(countSimpleDigits(input)).toEqual(26)
   });
 
   test('my input', () => {
     const input = parseInput(require('./day8.input'));
-    expect(countDigits(input)).toEqual(362)
+    expect(countSimpleDigits(input)).toEqual(362)
   });
 });
 
@@ -134,7 +134,8 @@ describe('break code', () => {
     expect(solve(input)).toEqual(5353)
   });
   test('aoc example', function () {
-    expect(solve(aocExample)).toEqual(61229)
+    const input = parseInput(aocExample);
+    expect(solve(input)).toEqual(61229)
   });
   test('my input', function () {
     const input = parseInput(require('./day8.input'));
