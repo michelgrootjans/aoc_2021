@@ -19,15 +19,12 @@ const parseInput = input => {
 };
 
 const countSimpleDigits = input => {
-  const sumSimpleDigits = line => {
-    return line.map(word => word.length)
-      .filter(length => [2, 3, 4, 7].includes(length))
-      .length
-  };
-
   return _.flow(
     _.map(line => line[1]),
-    _.map(sumSimpleDigits),
+    _.map(line =>
+      line.map(word => word.length)
+        .filter(length => [2, 3, 4, 7].includes(length))
+        .length),
     _.sum,
   )(input)
 };
