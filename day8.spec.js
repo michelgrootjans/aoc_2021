@@ -59,9 +59,6 @@ describe('count 1, 4, 7, 8', () => {
   });
 });
 
-const contains = (whole, part) => part.split('')
-  .every(letter => whole.indexOf(letter) !== -1);
-
 const minus = (whole, part) => {
   const wholes = whole.split('');
   const parts = part.split('');
