@@ -68,19 +68,20 @@ const minus = (whole, part) => {
 
 const crack = line => {
   const code = line[0];
-  const one = code.find(digits => digits.length === 2)
-  const four = code.find(digits => digits.length === 4)
-  const seven = code.find(digits => digits.length === 3)
-  const eight = code.find(digits => digits.length === 7)
 
-  const two = code.find(digits => digits.length === 5 && minus(digits, four).length === 3)
-  const three = code.find(digits => digits.length === 5 && minus(digits, one).length === 3)
-  const five = code.find(digits => digits.length === 5 && ![two, three].includes(digits))
+  const one = code.find(digit => digit.length === 2)
+  const four = code.find(digit => digit.length === 4)
+  const seven = code.find(digit => digit.length === 3)
+  const eight = code.find(digit => digit.length === 7)
 
-  const six = code.find(digits => digits.length === 6 && minus(digits, one).length === 5)
-  const nine = code.find(digits => digits.length === 6 && minus(digits, four).length === 2)
-  const zero = code.find(digits => digits.length === 6 && ![six, nine].includes(digits))
+  const two = code.find(digit => digit.length === 5 && minus(digit, four).length === 3)
+  const three = code.find(digit => digit.length === 5 && minus(digit, one).length === 3)
+  const five = code.find(digit => digit.length === 5 && ![two, three].includes(digit))
 
+  const six = code.find(digit => digit.length === 6 && minus(digit, one).length === 5)
+  const nine = code.find(digit => digit.length === 6 && minus(digit, four).length === 2)
+  const zero = code.find(digit => digit.length === 6 && ![six, nine].includes(digit))
+  
   return {
     [zero]: 0,
     [one]: 1,
@@ -97,8 +98,8 @@ const crack = line => {
 
 const solve = input => {
   return _.flow(
-    _.map(line => ({line, dictionary: crack(line)})),
-    _.map(tuple => tuple.line[1].map(word => tuple.dictionary[word])),
+    _.map(line => ({ dictionary: crack(line), output: line[1]})),
+    _.map(tuple => tuple.output.map(word => tuple.dictionary[word])),
     _.map(numbers => parseInt(numbers.join(''))),
     _.sum,
   )(input)
