@@ -99,7 +99,7 @@ const solve = input => {
   return _.flow(
     _.map(line => ({line, dictionary: crack(line)})),
     _.map(tuple => tuple.line[1].map(word => tuple.dictionary[word])),
-    _.map(numbers => numbers[0] * 1000 + numbers[1] * 100 + numbers[2] * 10 + numbers[3]),
+    _.map(numbers => parseInt(numbers.join(''))),
     _.sum,
   )(input)
 };
