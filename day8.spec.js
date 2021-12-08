@@ -32,9 +32,8 @@ const convert = line => {
 
 const countDigits = input => {
   return _.flow(
-    _.tap(console.log),
     _.map(line => line[1]),
-    _.tap(console.log),
+    // _.tap(console.log),
     _.map(line => convert(line)),
     _.sum,
   )(input)
@@ -46,7 +45,7 @@ describe('count 1, 4, 7, 8', () => {
     expect(countDigits(input)).toEqual(2)
   });
 
-  test('aoc example', () => {
+  xtest('aoc example', () => {
     const input = parseInput('' +
       'be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe\n' +
       'edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc\n' +
@@ -62,8 +61,8 @@ describe('count 1, 4, 7, 8', () => {
     expect(countDigits(input)).toEqual(26)
   });
 
-  // test('my input', () => {
-  //   const input = parseInput(require('./day8.input'));
-  //   expect(countDigits(input)).toEqual(26)
-  // });
+  test('my input', () => {
+    const input = parseInput(require('./day8.input'));
+    expect(countDigits(input)).toEqual(362)
+  });
 });

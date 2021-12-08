@@ -1,4 +1,4 @@
-module.export = '' +
+module.exports = '' +
   'cgdf eagcbf fc adefg eacdb fbedga geafcd efc dacfe fdgaecb | dcefbag dgcf fc daefc\n' +
   'bdecf dcagb gbf gcbdf deacbf fg fdebgc fegdcba dgef bgefac | dbfec gbacefd gf bfg\n' +
   'cfeag becgda bag ab abcd ecgdb gdefba agcbe gdcebf fgebadc | ab cdegbf cbda cgfebad\n' +
