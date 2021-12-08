@@ -1,19 +1,22 @@
 const _ = require("lodash/fp");
-const parseSubLine = line => _.flow(
-  _.split(' '),
-  _.map(_.trim),
-  _.filter(_.negate(_.isEmpty))
-)(line);
 
-const parseLine = line => _.flow(
-  _.split('|'),
-  _.map(parseSubLine),
-)(line);
+const parseInput = input => {
+  const parseSubLine = line => _.flow(
+    _.split(' '),
+    _.map(_.trim),
+    _.filter(_.negate(_.isEmpty))
+  )(line);
 
-const parseInput = _.flow(
-  _.split('\n'),
-  _.map(parseLine),
-);
+  const parseLine = line => _.flow(
+    _.split('|'),
+    _.map(parseSubLine),
+  )(line);
+
+  return _.flow(
+    _.split('\n'),
+    _.map(parseLine),
+  )(input);
+};
 
 const convert = line => {
   return line.map(word => word.length)
