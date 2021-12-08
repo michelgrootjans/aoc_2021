@@ -72,18 +72,18 @@ const minus = (whole, part) => {
 
 const crack = line => {
   const code = line[0];
-  const one = code.find(word => word.length === 2)
-  const four = code.find(word => word.length === 4)
-  const seven = code.find(word => word.length === 3)
-  const eight = code.find(word => word.length === 7)
+  const one = code.find(digits => digits.length === 2)
+  const four = code.find(digits => digits.length === 4)
+  const seven = code.find(digits => digits.length === 3)
+  const eight = code.find(digits => digits.length === 7)
 
-  const two = code.find(word => word.length === 5 && minus(word, four).length === 3)
-  const three = code.find(word => word.length === 5 && contains(word, one))
-  const five = code.find(word => word.length === 5 && ![two, three].includes(word))
+  const two = code.find(digits => digits.length === 5 && minus(digits, four).length === 3)
+  const three = code.find(digits => digits.length === 5 && contains(digits, one))
+  const five = code.find(digits => digits.length === 5 && ![two, three].includes(digits))
 
-  const six = code.find(word => word.length === 6 && minus(word, one).length === 5)
-  const nine = code.find(word => word.length === 6 && contains(word, four))
-  const zero = code.find(word => word.length === 6 && ![six, nine].includes(word))
+  const six = code.find(digits => digits.length === 6 && minus(digits, one).length === 5)
+  const nine = code.find(digits => digits.length === 6 && contains(digits, four))
+  const zero = code.find(digits => digits.length === 6 && ![six, nine].includes(digits))
 
   return {
     [zero]: 0,
