@@ -1,3 +1,5 @@
+const _ = require('lodash/fp');
+
 const Edge = () => {
   return {
     height: 10,
@@ -10,33 +12,34 @@ const Point = (row, column, height) => {
     row,
     column,
     height,
+    state: `(${row},${column},${height})`,
     riskLevel: height + 1,
     isLowerThan: otherPoint => height < otherPoint.height
   }
 }
 
-const lowPoints = map => {
-  const heigth = map.length;
-  const width = map[0].length;
+const getPoint = (row, column, map) => {
+  if (row < 0 || map.length <= row) return Edge();
+  if (column < 0 || map[row].length <= column) return Edge();
+  return Point(row, column, map[row][column]);
+};
 
+function neighborsOf(point, map) {
+  return [
+    getPoint(point.row, point.column - 1, map),
+    getPoint(point.row, point.column + 1, map),
+    getPoint(point.row - 1, point.column, map),
+    getPoint(point.row + 1, point.column, map),
+  ];
+}
+
+const lowPoints = map => {
   const result = []
 
-  const getPoint = (row, column) => {
-    if (row < 0 || heigth <= row) return Edge();
-    if (column < 0 || width <= column) return Edge();
-    return Point(row, column, map[row][column]);
-  };
-
-  for (let rowIndex = 0; rowIndex < heigth; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < width; columnIndex++) {
-      const point = getPoint(rowIndex, columnIndex)
-      const neigbors = [
-        getPoint(rowIndex, columnIndex - 1),
-        getPoint(rowIndex, columnIndex + 1),
-        getPoint(rowIndex - 1, columnIndex),
-        getPoint(rowIndex + 1, columnIndex),
-      ];
-      if (neigbors.every(neigbor => point.isLowerThan(neigbor))) {
+  for (let row = 0; row < map.length; row++) {
+    for (let column = 0; column < map[row].length; column++) {
+      const point = getPoint(row, column, map)
+      if (neighborsOf(point, map).every(neigbor => point.isLowerThan(neigbor))) {
         result.push(point)
       }
     }
@@ -46,13 +49,35 @@ const lowPoints = map => {
 };
 const totalRiskLevel = map => lowPoints(map).map(location => location.riskLevel).reduce((sum, riskLevel) => sum + riskLevel, 0);
 
+function higherNeigborsOf(points, map) {
+  return _.flow(
+    _.map(p => neighborsOf(p, map).filter(neighbor => neighbor.height < 9 && neighbor.height > p.height)),
+    _.flatten,
+    _.uniqBy(p => p.state),
+    // _.tap(neighbors => console.log({from: points.map(p => p.state), to: neighbors.map(p => p.state)}))
+  )(points)
+}
+
 function basins(map) {
-  // return lowPoints(map)
-  return [3, 9, 14, 9];
+  const toBasin = (points) => {
+    if(points.length === 0) return []
+    const higherNeighbors = higherNeigborsOf(points, map);
+    return [...points, ...toBasin(higherNeighbors)]
+  };
+
+  return _.flow(
+    _.map(point => toBasin([point])),
+    _.map(basin => _.uniqBy(p => p.state)(basin)),
+    _.map(basin => basin.length),
+  )(lowPoints(map));
 }
 
 function largestBasins(map) {
-  return 9 * 14 * 9;
+  return _(basins(map))
+    .sortBy(size => size)
+    .reverse()
+    .take(3)
+    .reduce((total, basin) => total * basin, 1);
 }
 
 describe('smoke basin', () => {
@@ -89,7 +114,7 @@ describe('smoke basin', () => {
       expect(totalRiskLevel(map)).toEqual(462);
     });
   });
-  xdescribe('basins', () => {
+  describe('basins', () => {
     test('aoc example', () => {
       const map = [
         [2, 1, 9, 9, 9, 4, 3, 2, 1, 0],
@@ -102,10 +127,10 @@ describe('smoke basin', () => {
       expect(basins(map)).toEqual([3, 9, 14, 9]);
       expect(largestBasins(map)).toEqual(9 * 14 * 9);
     });
-    xtest('my input', () => {
+    test('my input', () => {
       const map = require('./day9.input');
 
-      expect(largestBasins(map)).toEqual(0);
+      expect(largestBasins(map)).toEqual(1397760);
     });
   });
 });
