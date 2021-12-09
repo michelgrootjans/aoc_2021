@@ -81,7 +81,7 @@ const crack = line => {
   const six = code.find(digit => digit.length === 6 && minus(digit, one).length === 5)
   const nine = code.find(digit => digit.length === 6 && minus(digit, four).length === 2)
   const zero = code.find(digit => digit.length === 6 && ![six, nine].includes(digit))
-  
+
   return {
     [zero]: 0,
     [one]: 1,
