@@ -1,9 +1,11 @@
 const _ = require('lodash')
+const lines = require("./day10.input");
 
 const openingCharacters = ['(', '[', '{', '<']
 const pairs = ['()', '[]', '{}', '<>']
 const matches = {'(': ')', '[': ']', '{': '}', '<': '>'}
-const scores = {')': 3, ']': 57, '}': 1197, '>': 25137}
+const corruptScores = {')': 3, ']': 57, '}': 1197, '>': 25137}
+const incompleteScores = {')': 1, ']': 2, '}': 3, '>': 4}
 
 const checkLine = line => {
   const characterStack = []
@@ -17,23 +19,59 @@ const checkLine = line => {
       if (pairs.includes(pair)) {
         characterStack.pop();
       } else {
-        return {state: 'corrupted', score: scores[character]}
+        return {state: 'corrupted', score: corruptScores[character]}
       }
     }
   }
-  return {state: 'valid', score: 0};
+  if (characterStack.length > 0) {
+    const score = _(characterStack)
+      .reverse()
+      .map(character => matches[character])
+      .map(closingCharacter => incompleteScores[closingCharacter])
+      .reduce((total, number) => (total * 5) + number, 0)
+    ;
+
+    return {state: 'incomplete', score};
+  }
+  return {state: 'valid'};
 };
 
-const scoreCorruptLines = lines => {
+const scoreCorruptedLines = lines => {
   const score = _(lines)
     .map(checkLine)
+    .filter(result => result.state === 'corrupted')
     .map(result => result.score)
     .sum();
   return {score}
 };
 
+const scoreIncompleteLines = lines => {
+  const scores = _(lines)
+    .map(checkLine)
+    .filter(result => result.state === 'incomplete')
+    .map(result => result.score)
+    .sortBy(number => number)
+    .value();
+
+  const middleIndex = (scores.length - 1) / 2;
+
+  return {score: scores[middleIndex]}
+};
+
 describe('Syntax Scoring', () => {
-  describe('corrupt lines', () => {
+  const aocExample = [
+    '[({(<(())[]>[[{[]{<()<>>',
+    '[(()[<>])]({[<{<<[]>>(',
+    '{([(<{}[<>[]}>{[]{[(<()>',
+    '(((({<>}<{<{<>}{[]{[]{}',
+    '[[<[([]))<([[{}[[()]]]',
+    '[{[{({}]{}}([{[{{{}}([]',
+    '{<[[]]>}<{[{[{[]{()[[[]',
+    '[<(<(<(<{}))><([]([]()',
+    '<{([([[(<>()){}]>(<<{{',
+    '<{([{{}}[<[[[<>{}]]]>[]]'
+  ];
+  describe('single lines', () => {
     test.each([
       ['()'], ['[]'], ['{}'], ['<>'], ['<>'],
       ['(())'], ['([])'], ['({})'], ['(<>)'],
@@ -51,28 +89,31 @@ describe('Syntax Scoring', () => {
     ])('%p is corrupted - score = %d', (line, score) => {
       expect(checkLine(line)).toMatchObject({state: 'corrupted', score});
     });
-
+    test.each([
+      ['(', 1], ['[', 2], ['{', 3], ['<', 4],
+      ['((', 5 + 1],
+      ['([', 1 + (2 * 5)],
+      ['<{([', 4 + 3 * 5 + 1 * 5 * 5 + 2 * 5 * 5 * 5],
+    ])('%p is incomplete - score = %d', (line, score) => {
+      expect(checkLine(line)).toMatchObject({state: 'incomplete', score});
+    });
+  });
+  describe('corrupt lines', () => {
     test('aoc example', () => {
-      const lines = [
-        '[({(<(())[]>[[{[]{<()<>>',
-        '[(()[<>])]({[<{<<[]>>(',
-        '{([(<{}[<>[]}>{[]{[(<()>',
-        '(((({<>}<{<{<>}{[]{[]{}',
-        '[[<[([]))<([[{}[[()]]]',
-        '[{[{({}]{}}([{[{{{}}([]',
-        '{<[[]]>}<{[{[{[]{()[[[]',
-        '[<(<(<(<{}))><([]([]()',
-        '<{([([[(<>()){}]>(<<{{',
-        '<{([{{}}[<[[[<>{}]]]>[]]'
-      ];
-      expect(scoreCorruptLines(lines)).toMatchObject({score: 26397});
+      expect(scoreCorruptedLines(aocExample)).toMatchObject({score: 26397});
     });
     test('aoc example', () => {
       const lines = require('./day10.input');
-      expect(scoreCorruptLines(lines)).toMatchObject({score: 167379});
+      expect(scoreCorruptedLines(lines)).toMatchObject({score: 167379});
     });
   });
   describe('incomplete lines', () => {
-
+    test('aoc example', () => {
+      expect(scoreIncompleteLines(aocExample)).toMatchObject({score: 288957});
+    });
+    test('aoc example', () => {
+      const lines = require('./day10.input');
+      expect(scoreIncompleteLines(lines)).toMatchObject({score: 2776842859});
+    });
   });
 });
