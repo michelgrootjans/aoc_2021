@@ -1,48 +1,51 @@
 const _ = require('lodash')
-const lines = require("./day10.input");
 
 const openingCharacters = ['(', '[', '{', '<']
-const pairs = ['()', '[]', '{}', '<>']
-const matches = {'(': ')', '[': ']', '{': '}', '<': '>'}
+const pairs = {'(': ')', '[': ']', '{': '}', '<': '>'}
 const corruptScores = {')': 3, ']': 57, '}': 1197, '>': 25137}
 const incompleteScores = {')': 1, ']': 2, '}': 3, '>': 4}
+
+const opensChunk = character => openingCharacters.includes(character);
+const closingCharacter = openingCharacter => pairs[openingCharacter];
+const isPair = (left, right) => closingCharacter(left) === right;
+
+const corruptScoreOf = c => corruptScores[c];
+const incompleteScore = c => incompleteScores[c];
+
+const incompleteScoreOf = characterStack => _(characterStack)
+  .reverse()
+  .map(closingCharacter)
+  .map(incompleteScore)
+  .reduce((total, number) => (total * 5) + number, 0);
 
 const checkLine = line => {
   const characterStack = []
 
   for (let i = 0; i < line.length; i++) {
-    const character = line[i]
-    if (openingCharacters.includes(character)) {
-      characterStack.push(character);
+    const currentCharacter = line[i]
+    if (opensChunk(currentCharacter)) {
+      characterStack.push(currentCharacter);
     } else {
-      const pair = _.last(characterStack) + character;
-      if (pairs.includes(pair)) {
+      const openingCharacter = _.last(characterStack);
+      if (isPair(openingCharacter, currentCharacter)) {
         characterStack.pop();
       } else {
-        return {state: 'corrupted', score: corruptScores[character]}
+        return {state: 'corrupted', score: corruptScoreOf(currentCharacter)}
       }
     }
   }
   if (characterStack.length > 0) {
-    const score = _(characterStack)
-      .reverse()
-      .map(character => matches[character])
-      .map(closingCharacter => incompleteScores[closingCharacter])
-      .reduce((total, number) => (total * 5) + number, 0)
-    ;
-
-    return {state: 'incomplete', score};
+    return {state: 'incomplete', score: incompleteScoreOf(characterStack)};
   }
   return {state: 'valid'};
 };
 
 const scoreCorruptedLines = lines => {
-  const score = _(lines)
+  return _(lines)
     .map(checkLine)
     .filter(result => result.state === 'corrupted')
     .map(result => result.score)
     .sum();
-  return {score}
 };
 
 const scoreIncompleteLines = lines => {
@@ -55,7 +58,7 @@ const scoreIncompleteLines = lines => {
 
   const middleIndex = (scores.length - 1) / 2;
 
-  return {score: scores[middleIndex]}
+  return scores[middleIndex];
 };
 
 describe('Syntax Scoring', () => {
@@ -100,20 +103,20 @@ describe('Syntax Scoring', () => {
   });
   describe('corrupt lines', () => {
     test('aoc example', () => {
-      expect(scoreCorruptedLines(aocExample)).toMatchObject({score: 26397});
+      expect(scoreCorruptedLines(aocExample)).toEqual(26397);
     });
     test('aoc example', () => {
       const lines = require('./day10.input');
-      expect(scoreCorruptedLines(lines)).toMatchObject({score: 167379});
+      expect(scoreCorruptedLines(lines)).toEqual(167379);
     });
   });
   describe('incomplete lines', () => {
     test('aoc example', () => {
-      expect(scoreIncompleteLines(aocExample)).toMatchObject({score: 288957});
+      expect(scoreIncompleteLines(aocExample)).toEqual(288957);
     });
     test('aoc example', () => {
       const lines = require('./day10.input');
-      expect(scoreIncompleteLines(lines)).toMatchObject({score: 2776842859});
+      expect(scoreIncompleteLines(lines)).toEqual(2776842859);
     });
   });
 });
