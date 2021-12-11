@@ -10,11 +10,11 @@ const step = ({state, flashes = 0}) => {
       energy: () => energy,
       increaseEnergy: () => !flashed && energy++,
       neigborOf: o => {
-        if(row === o.row && column === o.column) return false;
+        if (row === o.row && column === o.column) return false;
         return [row - 1, row, row + 1].includes(o.row) && [column - 1, column, column + 1].includes(o.column);
       },
       flash: () => {
-        if(flashed) return false;
+        if (flashed) return false;
         if (energy > 9) {
           flashed = true;
           energy = 0;
@@ -25,19 +25,18 @@ const step = ({state, flashes = 0}) => {
     });
   }
 
-  const octopi = _(state)
-    .map((line, rowIndex) => line.map((energyLevel, columnIndex) => new Octopus(rowIndex, columnIndex, energyLevel)))
-    .flatten()
-    .value()
-
-
-  function flash(octopus) {
+  const flash = octopus => {
     if (octopus.flash()) {
       const neighbors = octopi.filter(o => o.neigborOf(octopus));
       for (const neighbor of neighbors) neighbor.increaseEnergy()
       for (const neighbor of neighbors) flash(neighbor)
     }
-  }
+  };
+
+  const octopi = _(state)
+    .map((line, rowIndex) => line.map((energyLevel, columnIndex) => new Octopus(rowIndex, columnIndex, energyLevel)))
+    .flatten()
+    .value()
 
   for (const octopus of octopi) octopus.increaseEnergy()
   for (const octopus of octopi) flash(octopus)
@@ -62,10 +61,11 @@ function steps(state, number) {
 }
 
 function sync(state) {
-  let newState = {state: _.cloneDeep(state), flashes: 0}
+  const numberOfOctopi = state.length * state[0].length
+  let newState = {state: _.cloneDeep(state)};
   for (let i = 1; i < 10000; i++) {
-    newState = step(newState);
-    if (newState.state.every(line => line.every(octopus => octopus === 0))) return i
+    newState = step({...newState, flashes: 0});
+    if (newState.flashes === numberOfOctopi) return i
   }
   return 0;
 }
