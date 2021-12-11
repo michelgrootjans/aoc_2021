@@ -1,30 +1,21 @@
 const _ = require('lodash')
 
 const step = ({state, flashes = 0}) => {
-  function Octopus(x, y, energy) {
+  function Octopus(row, column, energy) {
     let flashed = false;
 
     return ({
-      x, y,
+      row: row, column: column,
       flashed: () => flashed,
       energy: () => energy,
       increaseEnergy: () => !flashed && energy++,
       neigborOf: o => {
-        if(x-1 === o.x && y-1 === o.y) return true
-        if(x === o.x && y-1 === o.y) return true
-        if(x+1 === o.x && y-1 === o.y) return true
-
-        if(x-1 === o.x && y === o.y) return true
-        if(x+1 === o.x && y === o.y) return true
-
-        if(x-1 === o.x && y+1 === o.y) return true
-        if(x === o.x && y+1 === o.y) return true
-        if(x+1 === o.x && y+1 === o.y) return true
-
-        return false;
+        if(row === o.row && column === o.column) return false;
+        return [row - 1, row, row + 1].includes(o.row) && [column - 1, column, column + 1].includes(o.column);
       },
       flash: () => {
-        if (!flashed && energy > 9) {
+        if(flashed) return false;
+        if (energy > 9) {
           flashed = true;
           energy = 0;
           return true;
@@ -35,7 +26,7 @@ const step = ({state, flashes = 0}) => {
   }
 
   const octopi = _(state)
-    .map((line, lineIndex) => line.map((energyLevel, columnIndex) => new Octopus(lineIndex, columnIndex, energyLevel)))
+    .map((line, rowIndex) => line.map((energyLevel, columnIndex) => new Octopus(rowIndex, columnIndex, energyLevel)))
     .flatten()
     .value()
 
@@ -56,7 +47,7 @@ const step = ({state, flashes = 0}) => {
     .length
 
   const newState = octopi.reduce((grid, octopus) => {
-    grid[octopus.x][octopus.y] = octopus.energy();
+    grid[octopus.row][octopus.column] = octopus.energy();
     return grid;
   }, _.cloneDeep(state))
 
@@ -161,12 +152,12 @@ describe('Dumbo Octopus', () => {
     });
     test('aoc simple 2 steps', () => {
       const state = [
-          [1, 1, 1, 1, 1],
-          [1, 9, 9, 9, 1],
-          [1, 9, 1, 9, 1],
-          [1, 9, 9, 9, 1],
-          [1, 1, 1, 1, 1]
-        ];
+        [1, 1, 1, 1, 1],
+        [1, 9, 9, 9, 1],
+        [1, 9, 1, 9, 1],
+        [1, 9, 9, 9, 1],
+        [1, 1, 1, 1, 1]
+      ];
       expect(steps(state, 2)).toEqual(9);
     });
 
