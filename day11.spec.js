@@ -70,6 +70,15 @@ function steps(state, number) {
     .flashes;
 }
 
+function sync(state) {
+  let newState = {state: _.cloneDeep(state), flashes: 0}
+  for (let i = 1; i < 10000; i++) {
+    newState = step(newState);
+    if (newState.state.every(line => line.every(octopus => octopus === 0))) return i
+  }
+  return 0;
+}
+
 describe('Dumbo Octopus', () => {
   const aocExample = [
     [5, 4, 8, 3, 1, 4, 3, 2, 2, 3],
@@ -173,5 +182,12 @@ describe('Dumbo Octopus', () => {
       expect(steps(require('./day11.input'), 100)).toEqual(1637);
     });
 
+    test('aoc example synced', () => {
+      expect(sync(aocExample)).toEqual(195);
+    });
+
+    test('my input synced', () => {
+      expect(sync(require('./day11.input'))).toEqual(242);
+    });
   });
 });
