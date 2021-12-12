@@ -1,7 +1,5 @@
 const _ = require('lodash');
 
-const toString = o => o.toString();
-
 function Cave(name) {
   const connections = [];
   return {
@@ -14,14 +12,13 @@ function Cave(name) {
       if(name === 'end') return;
       connections.push(cave);
     },
-    toString: () => `${name}, connections: [${connections.map(c => c.name).join(', ')}]`
   };
 }
 
 const getCave = (name, map) => {
   let cave = map.caves.find(c => c.name === name);
   if (!cave) {
-    cave = new Cave(name);
+    cave = Cave(name);
     map.caves.push(cave);
   }
   return cave;
@@ -35,34 +32,18 @@ function buildMap(edges) {
     cave1.addConnection(cave2)
     cave2.addConnection(cave1)
     return map;
-  }, ({caves: []}));
-}
-
-function countPathsUtil(cave1, cave2, pathCount, map) {
-  // If current cave is same as destination, then increment count
-  if (cave1.name === cave2.name) {
-    pathCount++;
-  } else {
-    const connections = cave1.connections();
-    for (let i = 0; i < connections.length; i++) {
-      const nextCave = connections[i];
-      pathCount = countPathsUtil(nextCave, cave2, pathCount, map);
-    }
-  }
-  return pathCount;
+  }, {caves: []});
 }
 
 const canVisit = (cave, path) => cave.isBig() || !path.includes(cave.name);
 
-function traverse(cave, nextCaves, currentPath) {
+function explore(cave, nextCaves, currentPath) {
   return _(nextCaves)
     .filter(c => canVisit(c, currentPath))
-    // .tap(c => console.log({currentPath, canVisit: c.map(c => c.name)}))
     .map(c => {
       if (c.isEnd()) return {path: [...currentPath, c.name]};
-      return traverse(c, c.connections(), [...currentPath, c.name]);
+      return explore(c, c.connections(), [...currentPath, c.name]);
     })
-    // .tap(console.log)
     .flatten()
     .value();
 }
@@ -70,13 +51,8 @@ function traverse(cave, nextCaves, currentPath) {
 const countPaths = (edges) => {
   const map = buildMap(edges);
 
-  let pathCount = 0;
   const start = map.caves.find(c => c.name === 'start');
-  // const end = map.caves.find(c => c.name === 'end');
-  // pathCount = countPathsUtil(start, end, pathCount, map)
-  const paths = _.flatten(traverse(start, start.connections(), [start.name]))
-
-  console.log({edges, caves: map.caves.map(toString), pathCount, paths});
+  const paths = _.flatten(explore(start, start.connections(), [start.name]))
 
   return paths.length;
 };
