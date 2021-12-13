@@ -909,17 +909,19 @@ module.exports = {
     {x: 1006, y: 292},
     {x: 339, y: 28},
   ],
-  instructions: 'fold along x=655\n' +
-    'fold along y=447\n' +
-    'fold along x=327\n' +
-    'fold along y=223\n' +
-    'fold along x=163\n' +
-    'fold along y=111\n' +
-    'fold along x=81\n' +
-    'fold along y=55\n' +
-    'fold along x=40\n' +
-    'fold along y=27\n' +
-    'fold along y=13\n' +
-    'fold along y=6'
+  instructions: [
+    {x: 655},
+    {y: 447},
+    {x: 327},
+    {y: 223},
+    {x: 163},
+    {y: 111},
+    {x: 81},
+    {y: 55},
+    {x: 40},
+    {y: 27},
+    {y: 13},
+    {y: 6}
+  ]
 }
 
