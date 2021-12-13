@@ -1,19 +1,17 @@
 const _ = require('lodash');
-const state = require("./day13.input");
 
+const mirror = (position, foldLine) => 2 * foldLine - position;
 
 const foldUp = foldLine => dot => {
   if (dot.y < foldLine) return dot;
 
-  const mirror = (position, foldLine) => 2 * foldLine - position;
   return {...dot, y: mirror(dot.y, foldLine)}
 };
 
 const foldLeft = foldLine => dot => {
-  if (dot.x > foldLine) return {...dot, x: dot.x - foldLine - 1};
+  if (dot.x < foldLine) return dot;
 
-  const mirror = (position, foldLine) => foldLine * 2 - position;
-  return {...dot, x: mirror(dot.x, foldLine) - foldLine - 1}
+  return {...dot, x: mirror(dot.x, foldLine)}
 };
 
 function foldOnce(state) {
@@ -23,7 +21,6 @@ function foldOnce(state) {
     dots: _(state.dots)
       .map(foldOperation)
       .uniqWith((left, right) => left.x === right.x && left.y === right.y)
-      // .tap(console.log)
       .value(),
     instructions: _.drop(state.instructions, 1)
   };
@@ -41,7 +38,7 @@ function display(points) {
   for (let y = 0; y <= maxY; y++) {
     let line = ''
     for (let x = 0; x <= maxX; x++) {
-      if(points.find(p => p.x === x && p.y === y)) line += 'x'
+      if (points.find(p => p.x === x && p.y === y)) line += 'x'
       else line += '.'
     }
     lines.push(line);
@@ -91,6 +88,15 @@ describe('Transparent Origami', () => {
       expect(foldOnce(state)).toMatchObject({dots: [{x: 1, y: 0}]});
       expect(fold(state)).toEqual(1)
     });
+    test('fold left with one dot left of the fold', function () {
+      // .|x => x
+      const state = {
+        dots: [{x: 0, y: 0}],
+        instructions: [{x: 1}]
+      };
+      expect(foldOnce(state)).toMatchObject({dots: [{x: 0, y: 0}]});
+      expect(fold(state)).toEqual(1)
+    });
     test('fold left one dot', function () {
       // .|x => x
       const state = {
@@ -101,12 +107,12 @@ describe('Transparent Origami', () => {
       expect(fold(state)).toEqual(1)
     });
     test('fold left three dots', function () {
-      // x x x | . . . => x x x
+      // . . . | . x x => x x
       const state = {
-        dots: [{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}],
+        dots: [{x: 5, y: 0}, {x: 6, y: 0}],
         instructions: [{x: 3}]
       };
-      expect(foldOnce(state)).toMatchObject({dots: [{x: 2, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}]});
+      expect(foldOnce(state)).toMatchObject({dots: [{x: 1, y: 0}, {x: 0, y: 0}]});
     });
     test('fold left two dots', function () {
       // .|x => x
@@ -180,12 +186,13 @@ describe('Transparent Origami', () => {
     test('my input', () => {
       const state = require('./day13.input')
       expect(display(foldAll(state).dots)).toEqual("" +
-        "..xx.." + ".xxx." + ".xx.." + ".xxx." + "...x." + ".xx.." + "x..x." + ".xxx/n" +
-        ".x..x." + "x..x." + "x..x." + "x..x." + "...x." + "x..x." + "x..x." + "x..x/n" +
-        ".x..x." + "x..x." + "...x." + "x..x." + "...x." + "x..x." + "xxxx." + "x..x/n" +
-        ".xxxx." + ".xxx." + "...x." + ".xxx." + "...x." + "xxxx." + "x..x." + ".xxx/n" +
-        ".x..x." + ".x.x." + "x..x." + ".x.x." + "...x." + "x..x." + "x..x." + ".x.x/n" +
-        ".x..x." + "x..x." + ".xx.." + "x..x." + "xxxx." + "x..x." + "x..x." + "x..x");
+        "xxx.." + "x..x." + ".xx.." + "x...." + "xxx.." + ".xx.." + "xxx.." + ".xx./n" +
+        "x..x." + "x..x." + "x..x." + "x...." + "x..x." + "x..x." + "x..x." + "x..x/n" +
+        "x..x." + "xxxx." + "x..x." + "x...." + "x..x." + "x...." + "x..x." + "x..x/n" +
+        "xxx.." + "x..x." + "xxxx." + "x...." + "xxx.." + "x...." + "xxx.." + "xxxx/n" +
+        "x.x.." + "x..x." + "x..x." + "x...." + "x.x.." + "x..x." + "x.x.." + "x..x/n" +
+        "x..x." + "x..x." + "x..x." + "xxxx." + "x..x." + ".xx.." + "x..x." + "x..x" +
+        "");
     });
 
   });
