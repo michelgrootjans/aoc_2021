@@ -57,11 +57,14 @@ const binToLiteralValue = packet => {
 };
 
 const binToOperator15 = packet => {
+
   const {bVersion, bTypeId} = versionAndType(packet);
   const version = binToInt(bVersion);
   const typeId = binToInt(bTypeId);
   const lengthType = binToInt(packet.substr(6, 1)) === 0 ? 15 : 11;
+  if (packet.length < 7 + lengthType) throw `packet not big enough for an operator15: [${packet}]`
   const length = binToInt(packet.substr(7, lengthType));
+
 
   const subPackets = []
   let subPacket = {rest: packet.substr(7 + lengthType, length)}
@@ -69,6 +72,7 @@ const binToOperator15 = packet => {
     subPacket = binToPacket(subPacket.rest);
     subPackets.push(subPacket);
   }
+  const rest = subPacket.rest;
 
   return {
     version,
@@ -77,10 +81,12 @@ const binToOperator15 = packet => {
     length,
     subPackets,
     versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
+    rest,
   };
 };
 
 const binToOperator11 = packet => {
+  if (packet.length < 7 + 11) throw `packet not big enough for an operator11: [${packet}]`
   const {bVersion, bTypeId} = versionAndType(packet);
   const version = binToInt(bVersion);
   const typeId = binToInt(bTypeId);
@@ -95,6 +101,7 @@ const binToOperator11 = packet => {
     subPacket = binToPacket(subPacket.rest);
     subPackets.push(subPacket);
   }
+  const rest = subPacket.rest;
 
   return {
     version,
@@ -103,6 +110,7 @@ const binToOperator11 = packet => {
     numberOfSubPackets,
     subPackets,
     versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
+    rest,
   };
 };
 
@@ -117,14 +125,12 @@ const binToOperator = packet => {
 const binToPacket = packet => {
   const {bTypeId} = versionAndType(packet);
   const typeId = binToInt(bTypeId);
-  let result;
   if (typeId === 4) {
-    result = binToLiteralValue(packet);
-  } else {
-    result = binToOperator(packet)
+    const literal = binToLiteralValue(packet);
+    return literal;
   }
-  console.log({packet, result})
-  return result;
+  const operator = binToOperator(packet);
+  return operator
 };
 
 const hexToPacket = hex => binToPacket(hexToBin(hex));
@@ -214,9 +220,14 @@ describe('Packet Decoder', () => {
         }]
       }]
     }));
-    // test('620080001611562C8802118E34', () => expect(hexToPacket('620080001611562C8802118E34')).toMatchObject(
-    //   {version: 3, subPackets: [{}, {}], versionSum: 23}
-    // ));
+    xtest('620080001611562C8802118E34', () => expect(hexToPacket('620080001611562C8802118E34')).toMatchObject(
+      {
+        version: 3, versionSum: 12, subPackets: [
+          {subPackets: [{typeId: 4}, {typeId: 4}]},
+          {subPackets: [{typeId: 4}, {typeId: 4}]},
+        ]
+      }
+    ));
 
   })
 });
