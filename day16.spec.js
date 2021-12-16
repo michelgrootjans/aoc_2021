@@ -284,7 +284,23 @@ describe('Packet Decoder', () => {
       .toMatchObject({versionSum: 877}));
   })
   describe('total value', () => {
-    test('C200B40A82', () => expect(totalValue('C200B40A82')).toEqual(2+1));
-    test('04005AC33890', () => expect(totalValue('04005AC33890')).toEqual(6*9));
+    test('C200B40A82', () => expect(totalValue('C200B40A82'))
+      .toEqual(2+1));
+    test('04005AC33890', () => expect(totalValue('04005AC33890'))
+      .toEqual(6*9));
+    test('880086C3E88112', () => expect(totalValue('880086C3E88112'))
+      .toEqual(Math.min(7, 8, 9)));
+    test('CE00C43D881120', () => expect(totalValue('CE00C43D881120'))
+      .toEqual(Math.max(7, 8, 9)));
+    test('D8005AC2A8F0', () => expect(totalValue('D8005AC2A8F0'))
+      .toEqual(1));
+    test('F600BC2D8F', () => expect(totalValue('F600BC2D8F'))
+      .toEqual(0));
+    test('9C005AC2F8F0', () => expect(totalValue('9C005AC2F8F0'))
+      .toEqual(0));
+    test('9C0141080250320F1802104A08', () => expect(totalValue('9C0141080250320F1802104A08'))
+      .toEqual(1));
+    test('my input', () => expect(totalValue(require('./day16.input')))
+      .toEqual(194435634456));
   });
 });
