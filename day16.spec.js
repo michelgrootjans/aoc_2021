@@ -57,26 +57,24 @@ const binToLiteralValue = packet => {
 };
 
 const binToOperator15 = packet => {
+  if (packet.length < 7 + 15) throw `packet not big enough for an operator15: [${packet}]`
   const {bVersion, bTypeId} = versionAndType(packet);
   const version = binToInt(bVersion);
   const typeId = binToInt(bTypeId);
-  const lengthType = binToInt(packet.substr(6, 1)) === 0 ? 15 : 11;
-  if (packet.length < 7 + lengthType) throw `packet not big enough for an operator15: [${packet}]`
-  const length = binToInt(packet.substr(7, lengthType));
-
+  const length = binToInt(packet.substr(7, 15));
 
   const subPackets = []
-  let subPacket = {rest: packet.substr(7 + lengthType, length)}
+  let subPacket = {rest: packet.substr(7 + 15, length)}
   while (subPacket.rest.length > 5) {
     subPacket = binToPacket(subPacket.rest);
     subPackets.push(subPacket);
   }
-  const rest = subPacket.rest;
+  const rest = packet.substr(7 + 15 + length);
 
   return {
     version,
     typeId,
-    lengthTypeId: binToInt(packet.substr(6, 1)),
+    lengthTypeId: 0,
     length,
     subPackets,
     versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
@@ -89,12 +87,10 @@ const binToOperator11 = packet => {
   const {bVersion, bTypeId} = versionAndType(packet);
   const version = binToInt(bVersion);
   const typeId = binToInt(bTypeId);
-  const bLengthTypeId = packet.substr(6, 1);
 
   const numberOfSubPackets = binToInt(packet.substr(7, 11));
 
   const subPackets = []
-
   let subPacket = {rest: packet.substr(7 + 11)}
   for (let i = 0; i < numberOfSubPackets; i++) {
     subPacket = binToPacket(subPacket.rest);
@@ -105,7 +101,7 @@ const binToOperator11 = packet => {
   return {
     version,
     typeId,
-    lengthTypeId: binToInt(bLengthTypeId),
+    lengthTypeId: 1,
     numberOfSubPackets,
     subPackets,
     versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
@@ -114,7 +110,9 @@ const binToOperator11 = packet => {
 };
 
 const binToOperator = packet => {
-  if (binToInt(packet.substr(6, 1)) === 0) {
+  if (packet.length < 6) throw `packet to small to be an operator: [${packet}]`
+  const lengthTypeId = binToInt(packet.substr(6, 1));
+  if (lengthTypeId === 0) {
     return binToOperator15(packet);
   } else {
     return binToOperator11(packet);
@@ -124,12 +122,8 @@ const binToOperator = packet => {
 const binToPacket = packet => {
   const {bTypeId} = versionAndType(packet);
   const typeId = binToInt(bTypeId);
-  if (typeId === 4) {
-    const literal = binToLiteralValue(packet);
-    return literal;
-  }
-  const operator = binToOperator(packet);
-  return operator
+  if (typeId === 4) return binToLiteralValue(packet);
+  return binToOperator(packet)
 };
 
 const hexToPacket = hex => binToPacket(hexToBin(hex));
@@ -142,38 +136,42 @@ describe('Packet Decoder', () => {
     test('D2FE28', () => {
       expect(hexToBin('D2FE28')).toEqual('1101' + '0010' + '1111' + '1110' + '0010' + '1000')
     });
-    test('8A004A801A8002F478', () => expect(hexToBin(
-      '8A00' + '4A80' + '1A80' + '02F4' + '78'))
-      .toEqual(
-        //8        A        0        0
-        '1000' + '1010' + '0000' + '0000' +
-        //4        A        8        0
-        '0100' + '1010' + '1000' + '0000' +
-        //1        A        8        0
-        '0001' + '1010' + '1000' + '0000' +
-        //0        2        F        4
-        '0000' + '0010' + '1111' + '0100' +
-        //7        8
-        '0111' + '1000'
-      ));
-    test('620080001611562C8802118E34', () => expect(hexToBin(
-      '6200' + '8000' + '1611' + '562C' + '8802' + '118E' + '34'))
-      .toEqual(
-        //6       2        0        0
-        '0110' + '0010' + '0000' + '0000' +
-        //8       0        0        0
-        '1000' + '0000' + '0000' + '0000' +
-        //1       6        1        1
-        '0001' + '0110' + '0001' + '0001' +
-        //5       6        2        C
-        '0101' + '0110' + '0010' + '1100' +
-        //8       8        0        2
-        '1000' + '1000' + '0000' + '0010' +
-        //1       1        8        E
-        '0001' + '0001' + '1000' + '1110' +
-        //3       4
-        '0011' + '0100'
-      ));
+    test('8A004A801A8002F478', () => {
+      expect(hexToBin(
+        '8A00' + '4A80' + '1A80' + '02F4' + '78'))
+        .toEqual(
+          //8        A        0        0
+          '1000' + '1010' + '0000' + '0000' +
+          //4        A        8        0
+          '0100' + '1010' + '1000' + '0000' +
+          //1        A        8        0
+          '0001' + '1010' + '1000' + '0000' +
+          //0        2        F        4
+          '0000' + '0010' + '1111' + '0100' +
+          //7        8
+          '0111' + '1000'
+        );
+    });
+    test('620080001611562C8802118E34', () => {
+      expect(hexToBin(
+        '6200' + '8000' + '1611' + '562C' + '8802' + '118E' + '34'))
+        .toEqual(
+          //6       2        0        0
+          '0110' + '0010' + '0000' + '0000' +
+          //8       0        0        0
+          '1000' + '0000' + '0000' + '0000' +
+          //1       6        1        1
+          '0001' + '0110' + '0001' + '0001' +
+          //5       6        2        C
+          '0101' + '0110' + '0010' + '1100' +
+          //8       8        0        2
+          '1000' + '1000' + '0000' + '0010' +
+          //1       1        8        E
+          '0001' + '0001' + '1000' + '1110' +
+          //3       4
+          '0011' + '0100'
+        );
+    });
   })
   describe('literal value', () => {
     const hex = 'D2FE28';
@@ -238,7 +236,7 @@ describe('Packet Decoder', () => {
         }]
       }]
     }));
-    xtest('620080001611562C8802118E34', () => expect(hexToPacket('620080001611562C8802118E34')).toMatchObject(
+    test('620080001611562C8802118E34', () => expect(hexToPacket('620080001611562C8802118E34')).toMatchObject(
       {
         version: 3, versionSum: 12, subPackets: [
           {subPackets: [{typeId: 4}, {typeId: 4}]},
