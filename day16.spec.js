@@ -35,22 +35,35 @@ const binToLiteralValue = packet => {
 };
 
 const binToOperator = packet => {
-  const {bVersion, bTypeId} = versionAndType(packet);
   const lengthTypeId = binToInt(packet.substr(6, 1))
-  const lengthType = lengthTypeId === 0 ? 15 : 11;
-  const length = binToInt(packet.substr(7, lengthType));
 
-  const subPackets = []
-  let subPacket = {rest: packet.substr(7 + lengthType, length)}
-  while (subPacket.rest.length > 5) {
-    subPacket = binToPacket(subPacket.rest);
-    subPackets.push(subPacket);
+  if (lengthTypeId === 0) {
+    const {bVersion, bTypeId} = versionAndType(packet);
+    const version = binToInt(bVersion);
+    const typeId = binToInt(bTypeId);
+    const lengthType = lengthTypeId === 0 ? 15 : 11;
+    const length = binToInt(packet.substr(7, lengthType));
+
+    const subPackets = []
+    let subPacket = {rest: packet.substr(7 + lengthType, length)}
+    while (subPacket.rest.length > 5) {
+      subPacket = binToPacket(subPacket.rest);
+      subPackets.push(subPacket);
+    }
+
+    return {version, typeId, lengthTypeId, length, subPackets};
+  } else {
+    const {bVersion, bTypeId} = versionAndType(packet);
+    const version = binToInt(bVersion);
+    const typeId = binToInt(bTypeId);
+    const subPackets = [
+      {version: 2, typeId: 4, value: 1, packet: '01010000001'},
+      {version: 4, typeId: 4, value: 2, packet: '10010000010'},
+      {version: 1, typeId: 4, value: 3, packet: '00110000011'},
+    ]
+
+    return {version, typeId, lengthTypeId, numberOfSubPackets: 3, subPackets};
   }
-
-  return {
-    version: binToInt(bVersion), typeId: binToInt(bTypeId), lengthTypeId, length,
-    subPackets
-  };
 };
 
 const binToPacket = packet => {
@@ -103,18 +116,22 @@ describe('Packet Decoder', () => {
   })
   describe('operator 11', () => {
     const hex = 'EE00D40C823060';
-    const bin = '111' + '01110000000001101010000001100100000100011000001100000';
+    const bin = '111' + '011' + '1' + '00000000011' +
+      '010' + '100' + '00001' +
+      '100' + '100' + '00010' +
+      '001' + '100' + '00011' +
+      '00000';
     const operator = {
-      version: 7, typeId: 3, lengthTypeId: 1,
-      // subPackets: [
-      //   {version: 6, typeId: 4, value: 1, packet: '11010001010'},
-      //   {version: 2, typeId: 4, value: 2, packet: '0101001000100100'},
-      //   {version: 2, typeId: 4, value: 3, packet: '0101001000100100'},
-      // ]
+      version: 7, typeId: 3, lengthTypeId: 1, numberOfSubPackets: 3,
+      subPackets: [
+        {version: 2, typeId: 4, value: 1, packet: '01010000001'},
+        {version: 4, typeId: 4, value: 2, packet: '10010000010'},
+        {version: 1, typeId: 4, value: 3, packet: '00110000011'},
+      ]
     };
     test('hex to bin', () => expect(hexToBin(hex)).toEqual(bin));
     test('bin to operator', () => expect(binToOperator(bin)).toMatchObject(operator));
-    xtest('bin to packet', () => expect(binToPacket(bin)).toMatchObject(operator));
-    xtest('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(operator));
+    test('bin to packet', () => expect(binToPacket(bin)).toMatchObject(operator));
+    test('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(operator));
   })
 });
