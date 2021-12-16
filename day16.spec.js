@@ -1,4 +1,4 @@
-const _ = require('lodash');
+// const _ = require('lodash');
 
 const binToInt = bin => parseInt(bin, 2);
 const hexToBin = hex => parseInt(hex, 16).toString(2).padStart(hex.length*4, '0');
@@ -34,8 +34,6 @@ const binToLiteralValue = packet => {
   };
 };
 
-const hexToLiteralValue = hex => binToLiteralValue(hexToBin(hex));
-
 const binToOperator = packet => {
   const {bVersion, bTypeId} = versionAndType(packet);
   const lengthTypeId = binToInt(packet.substr(6, 1))
@@ -43,10 +41,10 @@ const binToOperator = packet => {
   const length = binToInt(packet.substr(7, lengthType));
 
   const subPackets = []
-  let command = {rest: packet.substr(7 + lengthType, length)}
-  while (command.rest.length > 5) {
-    command = binToLiteralValue(command.rest);
-    subPackets.push(command);
+  let subPacket = {rest: packet.substr(7 + lengthType, length)}
+  while (subPacket.rest.length > 5) {
+    subPacket = binToPacket(subPacket.rest);
+    subPackets.push(subPacket);
   }
 
   return {
@@ -88,7 +86,7 @@ describe('Packet Decoder', () => {
     test('bin to packet', () => expect(binToPacket(bin)).toMatchObject(literal));
     test('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(literal));
   })
-  describe('operator', () => {
+  describe('operator 15', () => {
     const hex = '38006F45291200';
     const bin = '001' + '110' + '0' + '000000000011011' + '11010001010' + '0101001000100100' + '0000000';
     const operator = {
@@ -102,5 +100,21 @@ describe('Packet Decoder', () => {
     test('bin to operator', () => expect(binToOperator(bin)).toMatchObject(operator));
     test('bin to packet', () => expect(binToPacket(bin)).toMatchObject(operator));
     test('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(operator));
+  })
+  describe('operator 11', () => {
+    const hex = 'EE00D40C823060';
+    const bin = '111' + '01110000000001101010000001100100000100011000001100000';
+    const operator = {
+      version: 7, typeId: 3, lengthTypeId: 1,
+      // subPackets: [
+      //   {version: 6, typeId: 4, value: 1, packet: '11010001010'},
+      //   {version: 2, typeId: 4, value: 2, packet: '0101001000100100'},
+      //   {version: 2, typeId: 4, value: 3, packet: '0101001000100100'},
+      // ]
+    };
+    test('hex to bin', () => expect(hexToBin(hex)).toEqual(bin));
+    test('bin to operator', () => expect(binToOperator(bin)).toMatchObject(operator));
+    xtest('bin to packet', () => expect(binToPacket(bin)).toMatchObject(operator));
+    xtest('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(operator));
   })
 });
