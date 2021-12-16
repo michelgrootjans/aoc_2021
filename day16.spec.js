@@ -252,6 +252,18 @@ describe('Packet Decoder', () => {
         ]
       }
     ));
-
+    test('A0016C880162017C3686B18A3D4780', () => expect(hexToPacket('A0016C880162017C3686B18A3D4780')).toMatchObject(
+      {
+        versionSum: 31, subPackets: [
+          {subPackets: [
+              {subPackets: [{typeId: 4},{typeId: 4},{typeId: 4},{typeId: 4},{typeId: 4}]}
+            ]},
+        ]
+      }
+    ));
+  })
+  describe('my input', () => {
+    test('day16.input', () => expect(hexToPacket(require('./day16.input')))
+      .toMatchObject({versionSum: 31}));
   })
 });
