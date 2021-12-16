@@ -1,7 +1,24 @@
 const _ = require('lodash');
-
+const hexDictionary = {
+  '0': '0000',
+  '1': '0001',
+  '2': '0010',
+  '3': '0011',
+  '4': '0100',
+  '5': '0101',
+  '6': '0110',
+  '7': '0111',
+  '8': '1000',
+  '9': '1001',
+  'A': '1010',
+  'B': '1011',
+  'C': '1100',
+  'D': '1101',
+  'E': '1110',
+  'F': '1111',
+}
 const binToInt = bin => parseInt(bin, 2);
-const hexToBin = hex => parseInt(hex, 16).toString(2).padStart(hex.length * 4, '0');
+const hexToBin = hex => _(hex).map(n => hexDictionary[n]).join('')
 
 const parseLiteralValue = ({packet = '', value = '', rest}) => {
   if (rest.length < 5) throw `could not parse [${groups}]`
@@ -106,7 +123,7 @@ const binToPacket = packet => {
   } else {
     result = binToOperator(packet)
   }
-  console.log({result})
+  console.log({packet, result})
   return result;
 };
 
@@ -120,6 +137,19 @@ describe('Packet Decoder', () => {
     test('D2FE28', () => {
       expect(hexToBin('D2FE28')).toEqual('1101' + '0010' + '1111' + '1110' + '0010' + '1000')
     });
+    test('8A004A801A8002F478 to bin', () => expect(hexToBin(
+      '8A00' + '4A80' + '1A80' + '02F4' + '78'))
+      .toEqual(
+        //8        A        0        0
+        '1000' + '1010' + '0000' + '0000' +
+        //4        A        8        0
+        '0100' + '1010' + '1000' + '0000' +
+        //1        A        8        0
+        '0001' + '1010' + '1000' + '0000' +
+        //0        2        F        4
+        '0000' + '0010' + '1111' + '0100' +
+        //7        8
+        '0111' + '1000'));
   })
   describe('literal value', () => {
     const hex = 'D2FE28';
@@ -175,10 +205,12 @@ describe('Packet Decoder', () => {
     test('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(operator));
   })
   describe('other examples', () => {
-    fit('8A004A801A8002F478', () => expect(hexToPacket('8A004A801A8002F478')).toMatchObject({
+    test('8A004A801A8002F478', () => expect(hexToPacket('8A004A801A8002F478')).toMatchObject({
       version: 4, subPackets: [{
         version: 1, subPackets: [{
-          version: 5, subPackets: [] // wrong!!
+          version: 5, subPackets: [
+            {version: 6}
+          ]
         }]
       }]
     }));
