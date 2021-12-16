@@ -56,6 +56,16 @@ const binToLiteralValue = packet => {
   };
 };
 
+const operations = {
+  0: values => _(values).sum(),
+  1: values => values.reduce((product, number) => product * number, 1),
+  2: values => Math.min(...values),
+  3: values => Math.max(...values),
+  5: values => values[0] > values[1] ? 1 : 0,
+  6: values => values[0] < values[1] ? 1 : 0,
+  7: values => values[0] === values[1] ? 1 : 0,
+}
+
 const binToOperator15 = packet => {
   if (packet.length < 7 + 15) throw `packet not big enough for an operator15: [${packet}]`
   const {bVersion, bTypeId} = versionAndType(packet);
@@ -63,7 +73,7 @@ const binToOperator15 = packet => {
   const typeId = binToInt(bTypeId);
   const length = binToInt(packet.substr(7, 15));
 
-  const subPackets = []
+    const subPackets = []
   let subPacket = {rest: packet.substr(7 + 15, length)}
   while (subPacket.rest.length > 5) {
     subPacket = binToPacket(subPacket.rest);
@@ -79,6 +89,7 @@ const binToOperator15 = packet => {
     subPackets,
     versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
     rest,
+    value: operations[typeId](subPackets.map(p => p.value))
   };
 };
 
@@ -106,6 +117,7 @@ const binToOperator11 = packet => {
     subPackets,
     versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
     rest,
+    value: operations[typeId](subPackets.map(p => p.value))
   };
 };
 
@@ -128,7 +140,10 @@ const binToPacket = packet => {
 
 const hexToPacket = hex => binToPacket(hexToBin(hex));
 
-const totalValue = hex => 3;
+const totalValue = hex => {
+  const packet = hexToPacket(hex);
+  return packet.value;
+};
 
 describe('Packet Decoder', () => {
   describe('hex to bin', () => {
@@ -269,6 +284,7 @@ describe('Packet Decoder', () => {
       .toMatchObject({versionSum: 877}));
   })
   describe('total value', () => {
-    test('', () => expect(totalValue('C200B40A82')).toEqual(3));
+    test('C200B40A82', () => expect(totalValue('C200B40A82')).toEqual(2+1));
+    test('04005AC33890', () => expect(totalValue('04005AC33890')).toEqual(6*9));
   });
 });
