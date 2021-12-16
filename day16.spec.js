@@ -1,7 +1,7 @@
 // const _ = require('lodash');
 
 const binToInt = bin => parseInt(bin, 2);
-const hexToBin = hex => parseInt(hex, 16).toString(2).padStart(hex.length*4, '0');
+const hexToBin = hex => parseInt(hex, 16).toString(2).padStart(hex.length * 4, '0');
 
 const parseLiteralValue = ({packet = '', value = '', rest}) => {
   if (rest.length < 5) throw `could not parse [${groups}]`
@@ -34,42 +34,54 @@ const binToLiteralValue = packet => {
   };
 };
 
+const binToOperator15 = packet => {
+  const {bVersion, bTypeId} = versionAndType(packet);
+  const version = binToInt(bVersion);
+  const typeId = binToInt(bTypeId);
+  const lengthType = binToInt(packet.substr(6, 1)) === 0 ? 15 : 11;
+  const length = binToInt(packet.substr(7, lengthType));
+
+  const subPackets = []
+  let subPacket = {rest: packet.substr(7 + lengthType, length)}
+  while (subPacket.rest.length > 5) {
+    subPacket = binToPacket(subPacket.rest);
+    subPackets.push(subPacket);
+  }
+
+  return {version, typeId, lengthTypeId: binToInt(packet.substr(6, 1)), length, subPackets};
+};
+
+const binToOperator11 = packet => {
+  const {bVersion, bTypeId} = versionAndType(packet);
+  const version = binToInt(bVersion);
+  const typeId = binToInt(bTypeId);
+  const bLengthTypeId = packet.substr(6, 1);
+
+  const numberOfSubPackets = binToInt(packet.substr(7, 11));
+
+  const subPackets = []
+
+  let subPacket = {rest: packet.substr(7 + 11)}
+  for (let i = 0; i < numberOfSubPackets; i++) {
+    subPacket = binToPacket(subPacket.rest);
+    subPackets.push(subPacket);
+  }
+
+  return {version, typeId, lengthTypeId: binToInt(bLengthTypeId), numberOfSubPackets, subPackets};
+};
+
 const binToOperator = packet => {
-  const lengthTypeId = binToInt(packet.substr(6, 1))
-
-  if (lengthTypeId === 0) {
-    const {bVersion, bTypeId} = versionAndType(packet);
-    const version = binToInt(bVersion);
-    const typeId = binToInt(bTypeId);
-    const lengthType = lengthTypeId === 0 ? 15 : 11;
-    const length = binToInt(packet.substr(7, lengthType));
-
-    const subPackets = []
-    let subPacket = {rest: packet.substr(7 + lengthType, length)}
-    while (subPacket.rest.length > 5) {
-      subPacket = binToPacket(subPacket.rest);
-      subPackets.push(subPacket);
-    }
-
-    return {version, typeId, lengthTypeId, length, subPackets};
+  if (binToInt(packet.substr(6, 1)) === 0) {
+    return binToOperator15(packet);
   } else {
-    const {bVersion, bTypeId} = versionAndType(packet);
-    const version = binToInt(bVersion);
-    const typeId = binToInt(bTypeId);
-    const subPackets = [
-      {version: 2, typeId: 4, value: 1, packet: '01010000001'},
-      {version: 4, typeId: 4, value: 2, packet: '10010000010'},
-      {version: 1, typeId: 4, value: 3, packet: '00110000011'},
-    ]
-
-    return {version, typeId, lengthTypeId, numberOfSubPackets: 3, subPackets};
+    return binToOperator11(packet);
   }
 };
 
 const binToPacket = packet => {
   const {bTypeId} = versionAndType(packet);
   const typeId = binToInt(bTypeId);
-  if(typeId === 4) return binToLiteralValue(packet);
+  if (typeId === 4) return binToLiteralValue(packet);
   return binToOperator(packet)
 };
 
