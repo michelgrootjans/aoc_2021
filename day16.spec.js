@@ -57,7 +57,6 @@ const binToLiteralValue = packet => {
 };
 
 const binToOperator15 = packet => {
-
   const {bVersion, bTypeId} = versionAndType(packet);
   const version = binToInt(bVersion);
   const typeId = binToInt(bTypeId);
@@ -155,7 +154,26 @@ describe('Packet Decoder', () => {
         //0        2        F        4
         '0000' + '0010' + '1111' + '0100' +
         //7        8
-        '0111' + '1000'));
+        '0111' + '1000'
+      ));
+    test('620080001611562C8802118E34', () => expect(hexToBin(
+      '6200' + '8000' + '1611' + '562C' + '8802' + '118E' + '34'))
+      .toEqual(
+        //6       2        0        0
+        '0110' + '0010' + '0000' + '0000' +
+        //8       0        0        0
+        '1000' + '0000' + '0000' + '0000' +
+        //1       6        1        1
+        '0001' + '0110' + '0001' + '0001' +
+        //5       6        2        C
+        '0101' + '0110' + '0010' + '1100' +
+        //8       8        0        2
+        '1000' + '1000' + '0000' + '0010' +
+        //1       1        8        E
+        '0001' + '0001' + '1000' + '1110' +
+        //3       4
+        '0011' + '0100'
+      ));
   })
   describe('literal value', () => {
     const hex = 'D2FE28';
