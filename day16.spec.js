@@ -244,6 +244,14 @@ describe('Packet Decoder', () => {
         ]
       }
     ));
+    test('C0015000016115A2E0802F182340', () => expect(hexToPacket('C0015000016115A2E0802F182340')).toMatchObject(
+      {
+        versionSum: 23, subPackets: [
+          {subPackets: [{typeId: 4}, {typeId: 4}]},
+          {subPackets: [{typeId: 4}, {typeId: 4}]},
+        ]
+      }
+    ));
 
   })
 });
