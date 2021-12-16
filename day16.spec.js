@@ -59,7 +59,7 @@ const binToOperator15 = packet => {
     lengthTypeId: binToInt(packet.substr(6, 1)),
     length,
     subPackets,
-    versionSum: version + _(subPackets).map(p => p.versionSum).sum()
+    versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
   };
 };
 
@@ -85,7 +85,7 @@ const binToOperator11 = packet => {
     lengthTypeId: binToInt(bLengthTypeId),
     numberOfSubPackets,
     subPackets,
-    versionSum: version + _(subPackets).map(p => p.versionSum).sum()
+    versionSum: version + _(subPackets).map(p => p.versionSum).sum(),
   };
 };
 
@@ -100,8 +100,14 @@ const binToOperator = packet => {
 const binToPacket = packet => {
   const {bTypeId} = versionAndType(packet);
   const typeId = binToInt(bTypeId);
-  if (typeId === 4) return binToLiteralValue(packet);
-  return binToOperator(packet)
+  let result;
+  if (typeId === 4) {
+    result = binToLiteralValue(packet);
+  } else {
+    result = binToOperator(packet)
+  }
+  console.log({result})
+  return result;
 };
 
 const hexToPacket = hex => binToPacket(hexToBin(hex));
@@ -167,5 +173,15 @@ describe('Packet Decoder', () => {
     test('bin to operator', () => expect(binToOperator(bin)).toMatchObject(operator));
     test('bin to packet', () => expect(binToPacket(bin)).toMatchObject(operator));
     test('hex to packet', () => expect(hexToPacket(hex)).toMatchObject(operator));
+  })
+  describe('other examples', () => {
+    fit('8A004A801A8002F478', () => expect(hexToPacket('8A004A801A8002F478')).toMatchObject({
+      version: 4, subPackets: [{
+        version: 1, subPackets: [{
+          version: 5, subPackets: [] // wrong!!
+        }]
+      }]
+    }));
+
   })
 });
