@@ -108,7 +108,7 @@ describe('Chiton', () => {
       ]
       expect(lowestTotalRisk(parseMap(aocInput))).toEqual(1 + 1 + 2 + 1 + 3 + 6 + 5 + 1 + 1 + 1 + 5 + 1 + 3 + 2 + 3 + 2 + 1 + 1)
     });
-    test('my input', () => {
+    xtest('my input', () => {
       const input = require('./day15.input');
       expect(lowestTotalRisk(parseMap(input))).toEqual(508)
     });
@@ -155,7 +155,7 @@ describe('Chiton', () => {
       const nodes = parseMap(map);
       console.log('done')
       console.log('total risk ...')
-      expect(lowestTotalRisk(nodes)).toEqual(315)
+      expect(lowestTotalRisk(nodes)).toEqual(123456789)
       console.log('done')
     });
   })
