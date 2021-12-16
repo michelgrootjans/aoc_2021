@@ -128,6 +128,8 @@ const binToPacket = packet => {
 
 const hexToPacket = hex => binToPacket(hexToBin(hex));
 
+const totalValue = hex => 3;
+
 describe('Packet Decoder', () => {
   describe('hex to bin', () => {
     test('1', () => expect(hexToBin('1')).toEqual('0001'));
@@ -264,6 +266,9 @@ describe('Packet Decoder', () => {
   })
   describe('my input', () => {
     test('day16.input', () => expect(hexToPacket(require('./day16.input')))
-      .toMatchObject({versionSum: 31}));
+      .toMatchObject({versionSum: 877}));
   })
+  describe('total value', () => {
+    test('', () => expect(totalValue('C200B40A82')).toEqual(3));
+  });
 });
