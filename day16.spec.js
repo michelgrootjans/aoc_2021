@@ -137,7 +137,7 @@ describe('Packet Decoder', () => {
     test('D2FE28', () => {
       expect(hexToBin('D2FE28')).toEqual('1101' + '0010' + '1111' + '1110' + '0010' + '1000')
     });
-    test('8A004A801A8002F478 to bin', () => expect(hexToBin(
+    test('8A004A801A8002F478', () => expect(hexToBin(
       '8A00' + '4A80' + '1A80' + '02F4' + '78'))
       .toEqual(
         //8        A        0        0
@@ -206,7 +206,7 @@ describe('Packet Decoder', () => {
   })
   describe('other examples', () => {
     test('8A004A801A8002F478', () => expect(hexToPacket('8A004A801A8002F478')).toMatchObject({
-      version: 4, subPackets: [{
+      version: 4, versionSum: 4 + 1 + 5 + 6, subPackets: [{
         version: 1, subPackets: [{
           version: 5, subPackets: [
             {version: 6}
@@ -214,6 +214,9 @@ describe('Packet Decoder', () => {
         }]
       }]
     }));
+    // test('620080001611562C8802118E34', () => expect(hexToPacket('620080001611562C8802118E34')).toMatchObject(
+    //   {version: 3, subPackets: [{}, {}], versionSum: 23}
+    // ));
 
   })
 });
