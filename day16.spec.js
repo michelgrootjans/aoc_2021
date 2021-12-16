@@ -1,4 +1,4 @@
-// const _ = require('lodash');
+const _ = require('lodash');
 
 const binToInt = bin => parseInt(bin, 2);
 const hexToBin = hex => parseInt(hex, 16).toString(2).padStart(hex.length * 4, '0');
@@ -25,12 +25,17 @@ const binToLiteralValue = packet => {
   const {bVersion, bTypeId} = versionAndType(packet);
   const parsedValue = parseLiteralValue({rest: packet.substr(6)});
 
+  const version = binToInt(bVersion);
+  const typeId = binToInt(bTypeId);
+  const value = binToInt(parsedValue.value);
+
   return {
-    version: binToInt(bVersion),
-    typeId: binToInt(bTypeId),
-    value: binToInt(parsedValue.value),
+    version,
+    typeId,
+    value,
     packet: bVersion + bTypeId + parsedValue.packet,
     rest: parsedValue.rest,
+    versionSum: version,
   };
 };
 
@@ -48,7 +53,7 @@ const binToOperator15 = packet => {
     subPackets.push(subPacket);
   }
 
-  return {version, typeId, lengthTypeId: binToInt(packet.substr(6, 1)), length, subPackets};
+  return {version, typeId, lengthTypeId: binToInt(packet.substr(6, 1)), length, subPackets, versionSum: version + _(subPackets).map(p => p.versionSum).sum()};
 };
 
 const binToOperator11 = packet => {
@@ -67,7 +72,7 @@ const binToOperator11 = packet => {
     subPackets.push(subPacket);
   }
 
-  return {version, typeId, lengthTypeId: binToInt(bLengthTypeId), numberOfSubPackets, subPackets};
+  return {version, typeId, lengthTypeId: binToInt(bLengthTypeId), numberOfSubPackets, subPackets, versionSum: version + _(subPackets).map(p => p.versionSum).sum()};
 };
 
 const binToOperator = packet => {
@@ -104,7 +109,8 @@ describe('Packet Decoder', () => {
       typeId: 4,
       value: 2021,
       packet: '110' + '100' + '10111' + '11110' + '00101',
-      rest: '000'
+      rest: '000',
+      versionSum: 6
     };
     test('hex to bin', () => expect(hexToBin(hex)).toEqual(bin));
     test('bin to literal', () => expect(binToLiteralValue(bin)).toMatchObject(literal));
@@ -117,9 +123,10 @@ describe('Packet Decoder', () => {
     const operator = {
       version: 1, typeId: 6, lengthTypeId: 0, length: 27,
       subPackets: [
-        {version: 6, typeId: 4, value: 10, packet: '11010001010'},
-        {version: 2, typeId: 4, value: 20, packet: '0101001000100100'},
-      ]
+        {version: 6, typeId: 4, value: 10, versionSum: 6, packet: '11010001010'},
+        {version: 2, typeId: 4, value: 20, versionSum: 2, packet: '0101001000100100'},
+      ],
+      versionSum: 1 + 6 + 2,
     };
     test('hex to bin', () => expect(hexToBin(hex)).toEqual(bin));
     test('bin to operator', () => expect(binToOperator(bin)).toMatchObject(operator));
