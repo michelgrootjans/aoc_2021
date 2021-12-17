@@ -79,7 +79,7 @@ function highestPoint(targetDescription) {
   const maxNumberOfSteps = _(succesfulSteps).max() * 2;
 
   let successfulYVelocities = []
-  for (let initialYVelocity = -100; initialYVelocity < 100; initialYVelocity++) {
+  for (let initialYVelocity = target.bottomRight.y; initialYVelocity < 1000; initialYVelocity++) {
     const yPositions = yValuesOf(initialYVelocity, target, maxNumberOfSteps);
     const successfulYSteps = yPositions.map((y, index) => ({index, y}))
       .filter(step => target.withinY(step.y));
@@ -116,8 +116,7 @@ function highestPoint(targetDescription) {
       const firstTargetHit = xyValues.find(xy => target.withinX(xy[0]) && target.withinY(xy[1]));
       if (firstTargetHit) {
         const maxHeight = yVelocity.maxHeight;
-        console.log({xDrops, lastX, secondLastX, xValues, yValues, firstTargetHit, maxHeight})
-        return maxHeight;
+        return {xValues, yValues, firstTargetHit, maxHeight};
       }
     }
   }
@@ -125,15 +124,19 @@ function highestPoint(targetDescription) {
   // return 45;
 }
 
-const myInput = 'target area: x=143..177, y=-106..-71';
-
 describe('Trick Shot', () => {
   describe('highest point', () => {
     test('aoc example ', function () {
-      expect(highestPoint('target area: x=20..30, y=-10..-5')).toEqual(45)
+      expect(highestPoint('target area: x=20..30, y=-10..-5')).toMatchObject({
+        firstTargetHit: [21, -10],
+        maxHeight: 45
+      })
     });
     test('my input ', function () {
-      expect(highestPoint(myInput)).toBeGreaterThan(4950)
+      expect(highestPoint('target area: x=143..177, y=-106..-71')).toMatchObject({
+        firstTargetHit: [153, -106],
+        maxHeight: 5565
+      })
     });
   })
 })
