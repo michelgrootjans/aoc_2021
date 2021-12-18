@@ -6,6 +6,10 @@ function reduce(number) {
   return [[[[0,9],2],3],4];
 }
 
+function explode(param) {
+  return [0, 9];
+}
+
 describe('Snailfish', () => {
   describe('addition', () => {
     test('simple example', () => {
@@ -14,7 +18,10 @@ describe('Snailfish', () => {
   })
   describe('reduction', () => {
     describe('explosion', () => {
-      test('simple example', () => {
+      test('explode', () => {
+        expect(explode([[9,8],1])).toEqual([0, 9])
+      });
+      xtest('simple example', () => {
         expect(reduce([[[[[9,8],1],2],3],4])).toEqual([[[[0,9],2],3],4])
       });
     })
