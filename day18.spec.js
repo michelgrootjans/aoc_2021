@@ -6,7 +6,7 @@ function reduce(number) {
   return [[[[0,9],2],3],4];
 }
 
-function explode(param) {
+function explode(number) {
   return [0, 9];
 }
 
