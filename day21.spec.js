@@ -61,7 +61,8 @@ function Game({die, player1, player2, turn = 0}) {
     player2,
     move,
     moveUntilWin,
-    winner
+    winner,
+    turn
   };
 }
 
@@ -103,17 +104,37 @@ describe('Dirac Dice', () => {
     test('move twice', () => {
       expect(game.move().move()).toMatchObject({
         player1: {position: 10, score: 10},
-        player2: {position: 3, score: 3},})
+        player2: {position: 3, score: 3},
+      })
     });
     test('move 3 times', () => {
       expect(game.move().move().move()).toMatchObject({
         player1: {position: 4, score: 10 + 4},
-        player2: {position: 3, score: 3},})
+        player2: {position: 3, score: 3},
+      })
     });
     test('move until win', () => {
       expect(game.moveUntilWin()).toMatchObject({
         player1: {position: 10, score: 1000},
-        player2: {position: 3, score: 745},})
+        player2: {position: 3, score: 745},
+      })
+    });
+  });
+  describe('my input', () => {
+    let game;
+    beforeEach(() => {
+      const die = DeterministicDie(100);
+      const player1 = Player(8);
+      const player2 = Player(6);
+      game = Game({die, player1, player2});
+    })
+    test('move until win', () => {
+      expect(game.moveUntilWin()).toMatchObject({
+          player1: {position: 8, score: 1000},
+          player2: {position: 4, score: 674},
+          turn: 249
+        }
+      )
     });
   });
 });
