@@ -22,20 +22,46 @@ function Player(position, score = 0) {
   }
 }
 
-function Game({die, player1, player2}) {
+function Game({die, player1, player2, turn = 0}) {
+  const player1Up = () => turn % 2 === 0;
+
+  const winner = () => {
+    return player1.score >= 1000
+      || player2.score >= 1000
+  };
+
   const move = () => {
-    let newPlayer1 = player1.advance(die.roll(3));
-    let newPlayer2 = player2.advance(die.roll(3));
+    if (player1Up()) {
+      return Game({
+        die,
+        player1: player1.advance(die.roll(3)),
+        player2,
+        turn: turn + 1,
+      })
+    }
     return Game({
       die,
-      player1: newPlayer1,
-      player2: newPlayer2,
+      player1,
+      player2: player2.advance(die.roll(3)),
+      turn: turn + 1,
     })
+  };
+  const moveUntilWin = () => {
+    let game = move()
+    let iterations = 0;
+    while (!game.winner()) {
+      iterations++;
+      if (iterations > 1000) throw 'took too long'
+      game = game.move();
+    }
+    return game;
   };
   return {
     player1,
     player2,
-    move
+    move,
+    moveUntilWin,
+    winner
   };
 }
 
@@ -71,17 +97,23 @@ describe('Dirac Dice', () => {
     test('move once', () => {
       expect(game.move()).toMatchObject({
         player1: {position: 10, score: 10},
-        player2: {position: 3, score: 3},})
+        player2: {position: 8, score: 0},
+      })
     });
     test('move twice', () => {
       expect(game.move().move()).toMatchObject({
-        player1: {position: 4, score: 10 + 4},
-        player2: {position: 6, score: 3 + 6},})
+        player1: {position: 10, score: 10},
+        player2: {position: 3, score: 3},})
     });
     test('move 3 times', () => {
       expect(game.move().move().move()).toMatchObject({
-        player1: {position: 6, score: 10 + 4 + 6},
-        player2: {position: 7, score: 3 + 6 + 7},})
+        player1: {position: 4, score: 10 + 4},
+        player2: {position: 3, score: 3},})
+    });
+    test('move until win', () => {
+      expect(game.moveUntilWin()).toMatchObject({
+        player1: {position: 10, score: 1000},
+        player2: {position: 3, score: 745},})
     });
   });
 });
