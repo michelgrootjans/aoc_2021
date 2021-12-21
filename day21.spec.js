@@ -9,6 +9,20 @@ function DeterministicDie(sides) {
   };
 }
 
+function Player(position, score = 0) {
+  return {
+    position,
+    score
+  }
+}
+
+function Game({die, player1, player2}) {
+  return {
+    player1,
+    player2
+  };
+}
+
 describe('Dirac Dice', () => {
   describe('deterministic dice', () => {
     test('6-sided die', function () {
@@ -24,6 +38,11 @@ describe('Dirac Dice', () => {
       expect(die.roll(3)).toBe(4 + 5 + 6);
     });
     test('move once', () => {
+      const die = DeterministicDie(100);
+      expect(Game({die, player1: Player(1), player2: Player(2)})).toMatchObject({
+        player1: {position: 1, score: 0},
+        player2: {position: 2, score: 0},
+      })
     });
   });
 });
