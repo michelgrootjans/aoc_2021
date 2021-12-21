@@ -11,7 +11,7 @@ function DeterministicDie(sides) {
 
 function Player(position, score = 0) {
   const advance = (delta) => {
-    const newPosition = (position + delta) % 10;
+    const newPosition = ((position + delta - 1) % 10) + 1;
     return Player(newPosition, score + newPosition);
   };
 
@@ -54,21 +54,34 @@ describe('Dirac Dice', () => {
       expect(die.roll(3)).toBe(4 + 5 + 6);
     });
   });
-  describe('game', () => {
-    test('initial position', () => {
+  describe('aoc example', () => {
+    let game;
+    beforeEach(() => {
       const die = DeterministicDie(100);
-      expect(Game({die, player1: Player(1), player2: Player(2)})).toMatchObject({
-        player1: {position: 1, score: 0},
-        player2: {position: 2, score: 0},
+      const player1 = Player(4);
+      const player2 = Player(8);
+      game = Game({die, player1, player2});
+    })
+    test('initial position', () => {
+      expect(game).toMatchObject({
+        player1: {position: 4, score: 0},
+        player2: {position: 8, score: 0},
       })
     });
     test('move once', () => {
-      const die = DeterministicDie(100);
-      let game = Game({die, player1: Player(1), player2: Player(2)});
       expect(game.move()).toMatchObject({
-        player1: {position: 1 + (1+2+3), score: 1 + (1+2+3)},
-        player2: {position: 2 + (4+5+6-10), score: 2 + (4+5+6-10)},
-      })
+        player1: {position: 10, score: 10},
+        player2: {position: 3, score: 3},})
+    });
+    test('move twice', () => {
+      expect(game.move().move()).toMatchObject({
+        player1: {position: 4, score: 10 + 4},
+        player2: {position: 6, score: 3 + 6},})
+    });
+    test('move 3 times', () => {
+      expect(game.move().move().move()).toMatchObject({
+        player1: {position: 6, score: 10 + 4 + 6},
+        player2: {position: 7, score: 3 + 6 + 7},})
     });
   });
 });
