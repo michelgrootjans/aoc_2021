@@ -1,5 +1,11 @@
 const _ = require('lodash')
 
+function FixedDie(roll) {
+  return {
+    roll: (times = 1) => roll * times
+  };
+}
+
 function DeterministicDie(sides) {
   let index = 0;
   const rollOnce = () => (index++) % sides + 1;
@@ -18,32 +24,34 @@ function Player(position, score = 0) {
   return {
     position,
     score,
-    advance
+    advance,
+    wins: score >= 1000
   }
 }
 
 function Game({die, player1, player2, turn = 0}) {
   const player1Up = () => turn % 2 === 0;
+  const winner = () => player1.wins || player2.wins;
 
-  const winner = () => {
-    return player1.score >= 1000
-      || player2.score >= 1000
-  };
+  const nextGame = {
+    die,
+    player1,
+    player2,
+    turn: turn + 1,
+    player1Wins: player1.score >= 1000,
+    player2Wins: player2.score >= 1000,
+  }
 
-  const move = () => {
+  const move = (distance) => {
     if (player1Up()) {
       return Game({
-        die,
-        player1: player1.advance(die.roll(3)),
-        player2,
-        turn: turn + 1,
+        ...nextGame,
+        player1: distance || player1.advance(die.roll(3)),
       })
     }
     return Game({
-      die,
-      player1,
-      player2: player2.advance(die.roll(3)),
-      turn: turn + 1,
+      ...nextGame,
+      player2: distance || player2.advance(die.roll(3)),
     })
   };
   const moveUntilWin = () => {
@@ -130,11 +138,22 @@ describe('Dirac Dice', () => {
     })
     test('move until win', () => {
       expect(game.moveUntilWin()).toMatchObject({
-          player1: {position: 8, score: 1000},
-          player2: {position: 4, score: 674},
+          player1: {position: 8, score: 1000, wins: true},
+          player2: {position: 4, score: 674, wins: false},
           turn: 249
         }
       )
     });
   });
+  describe('Dirac Dice', () => {
+    let game;
+    beforeEach(() => {
+      const player1 = Player(8);
+      const player2 = Player(6);
+    })
+    test('one turn', () => {
+
+    });
+  });
+
 });
