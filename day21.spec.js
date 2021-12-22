@@ -8,7 +8,7 @@ function DeterministicDie(sides) {
   const move = game => game.move(roll(3));
 
   const moveUntilWin = (game, winningScore) => {
-    if (game.winner(winningScore)) return game;
+    if (game.winner) return game;
     return moveUntilWin(move(game), winningScore);
   };
 
@@ -24,21 +24,21 @@ function Player(position, score = 0) {
   return {position, score, advance}
 }
 
-function Game({die, player1, player2, turn = 0}) {
+function Game({player1, player2, winningScore = 1000, turn = 0}) {
   const player1Up = () => turn % 2 === 0;
-  const winner = (winningScore) => player1.score >= winningScore
-    || player2.wins >= winningScore;
+  const player1Wins = player1.score >= winningScore;
+  const player2Wins = player2.score >= winningScore;
+  const winner = player1Wins || player2Wins;
 
   const nextGame = {
-    die,
     player1,
     player2,
     turn: turn + 1,
-    player1Wins: player1.score >= 1000,
-    player2Wins: player2.score >= 1000,
+    player1Wins,
+    player2Wins,
   }
 
-  const move = (distance = die.roll(3)) => {
+  const move = (distance) => {
     if (player1Up()) {
       return Game({
         ...nextGame,
@@ -53,7 +53,7 @@ function Game({die, player1, player2, turn = 0}) {
   const moveUntilWin = (winningScore = 1000) => {
     let game = move()
     let iterations = 0;
-    while (!game.winner(winningScore)) {
+    while (!game.winner) {
       iterations++;
       if (iterations > 1000) throw 'took too long'
       game = game.move();
@@ -91,7 +91,7 @@ describe('Dirac Game', () => {
       die = DeterministicDie(100);
       const player1 = Player(4);
       const player2 = Player(8);
-      game = Game({die, player1, player2});
+      game = Game({player1, player2, winningScore: 1000});
     })
     test('initial position', () => {
       expect(game).toMatchObject({
@@ -137,7 +137,7 @@ describe('Dirac Game', () => {
       die = DeterministicDie(100);
       const player1 = Player(8);
       const player2 = Player(6);
-      game = Game({die, player1, player2});
+      game = Game({player1, player2, winningScore: 1000});
     })
     test('move until win', () => {
       game = die.moveUntilWin(game, 1000);
