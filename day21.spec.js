@@ -11,7 +11,14 @@ function DeterministicDie(sides) {
   const rollOnce = () => (index++) % sides + 1;
   const roll = (numberOfRolls = 1) => _(_.times(numberOfRolls, rollOnce)).sum();
 
-  return {roll};
+  const move = game => {
+    return game.move(roll(3));
+  }
+
+  return {
+    roll,
+    move
+  };
 }
 
 function Player(position, score = 0) {
@@ -41,16 +48,17 @@ function Game({die, player1, player2, turn = 0}) {
     player2Wins: player2.score >= 1000,
   }
 
-  const move = (distance) => {
+  const move = (distance = die.roll(3)) => {
+    distance = distance || player1.advance(die.roll(3))
     if (player1Up()) {
       return Game({
         ...nextGame,
-        player1: distance || player1.advance(die.roll(3)),
+        player1: player1.advance(distance),
       })
     }
     return Game({
       ...nextGame,
-      player2: distance || player2.advance(die.roll(3)),
+      player2: player2.advance(distance),
     })
   };
   const moveUntilWin = (winningScore = 1000) => {
@@ -89,9 +97,9 @@ describe('Dirac Game', () => {
     });
   });
   describe('aoc example', () => {
-    let game;
+    let die, game;
     beforeEach(() => {
-      const die = DeterministicDie(100);
+      die = DeterministicDie(100);
       const player1 = Player(4);
       const player2 = Player(8);
       game = Game({die, player1, player2});
@@ -103,7 +111,8 @@ describe('Dirac Game', () => {
       })
     });
     test('move once', () => {
-      expect(game.move()).toMatchObject({
+      game = die.move(game)
+      expect(game).toMatchObject({
         player1: {position: 10, score: 10},
         player2: {position: 8, score: 0},
       })
@@ -136,7 +145,7 @@ describe('Dirac Game', () => {
       game = Game({die, player1, player2});
     })
     test('move until win', () => {
-      expect(game.moveUntilWin()).toMatchObject({
+      expect(game.moveUntilWin(1000)).toMatchObject({
           player1: {position: 8, score: 1000},
           player2: {position: 4, score: 674},
           turn: 249
