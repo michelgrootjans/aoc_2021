@@ -2,7 +2,7 @@ const _ = require('lodash')
 
 function Reactor(cubes = []) {
   const step = (step, cubes) => {
-    return [];
+    return [{}];
   };
 
   const execute = ([head, ...tail]) => {
@@ -11,7 +11,7 @@ function Reactor(cubes = []) {
     const newCubes = step(head, cubes)
 
 
-    return Reactor()
+    return Reactor(newCubes)
   };
   return {
     on: cubes.length,
@@ -25,7 +25,7 @@ describe('Reactor Reboot', () => {
   });
   test.each([
     [[], 0],
-    [['hello'], 0],
+    [['on x=1..1,y=1..1,z=1..1'], 1],
   ])('%s => %d', (steps, on) => {
     const reactor = Reactor().execute(steps);
 
