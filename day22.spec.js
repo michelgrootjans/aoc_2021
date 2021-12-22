@@ -50,9 +50,7 @@ function Cuboid(description) {
 }
 
 function Reactor(cubes = []) {
-  const step = (step, cubes) => {
-    return Cuboid(step).apply(cubes)
-  };
+  const step = (step, cubes) => Cuboid(step).apply(cubes);
 
   const execute = ([head, ...tail]) => {
     if (!head) return Reactor(cubes);
