@@ -24,8 +24,8 @@ function Player(position, score = 0) {
   return {position, score, advance}
 }
 
-function Game({player1, player2, winningScore = 1000, turn = 0}) {
-  const player1Up = () => turn % 2 === 0;
+function Game({player1, player2, winningScore, turn = 0}) {
+  const player1Up = turn % 2 === 0;
   const player1Wins = player1.score >= winningScore;
   const player2Wins = player2.score >= winningScore;
   const winner = player1Wins || player2Wins;
@@ -33,13 +33,12 @@ function Game({player1, player2, winningScore = 1000, turn = 0}) {
   const nextGame = {
     player1,
     player2,
+    winningScore,
     turn: turn + 1,
-    player1Wins,
-    player2Wins,
   }
 
   const move = (distance) => {
-    if (player1Up()) {
+    if (player1Up) {
       return Game({
         ...nextGame,
         player1: player1.advance(distance),
@@ -50,6 +49,7 @@ function Game({player1, player2, winningScore = 1000, turn = 0}) {
       player2: player2.advance(distance),
     })
   };
+
   const moveUntilWin = (winningScore = 1000) => {
     let game = move()
     let iterations = 0;
