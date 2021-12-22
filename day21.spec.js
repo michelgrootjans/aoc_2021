@@ -50,7 +50,7 @@ function Game({player1, player2, winningScore, turn = 0}) {
     })
   };
 
-  const moveUntilWin = (winningScore = 1000) => {
+  const moveUntilWin = () => {
     let game = move()
     let iterations = 0;
     while (!game.winner) {
