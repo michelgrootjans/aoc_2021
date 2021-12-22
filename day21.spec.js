@@ -49,7 +49,6 @@ function Game({die, player1, player2, turn = 0}) {
   }
 
   const move = (distance = die.roll(3)) => {
-    distance = distance || player1.advance(die.roll(3))
     if (player1Up()) {
       return Game({
         ...nextGame,
