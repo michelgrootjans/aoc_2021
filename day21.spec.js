@@ -9,6 +9,7 @@ function DeterministicDie(sides) {
 
   const moveUntilWin = (game, winningScore) => {
     if (game.winner) return game;
+    if (game.turn > 2000) throw 'too many moves'
     return moveUntilWin(move(game), winningScore);
   };
 
@@ -60,11 +61,11 @@ function Game({player1, player2, winningScore, turn = 0}) {
     }
     return game;
   };
+
   return {
     player1,
     player2,
     move,
-    moveUntilWin,
     winner,
     turn
   };
