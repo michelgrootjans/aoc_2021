@@ -32,12 +32,18 @@ function Cuboid(description) {
       newCubes.push(Cube(xyz))
     }
 
+    const add = cubes => {
+      return _([...cubes, ...newCubes])
+        .uniqBy(c => c.description)
+        .value();
+    };
+
+    const subtract = cubes => {
+      return [];
+    };
+
     return {
-      apply: cubes => {
-        return _([...cubes, ...newCubes])
-          .uniqBy(c => c.description)
-          .value();
-      }
+      apply: description.startsWith('on') ? add : subtract
     };
   }
 
@@ -74,6 +80,8 @@ describe('Reactor Reboot', () => {
     [['on x=10..12,y=10..12,z=10..12'], 3 * 3 * 3],
     [['on x=1..1,y=1..1,z=1..1', 'on x=2..2,y=2..2,z=2..2'], 2],
     [['on x=1..1,y=1..1,z=1..1', 'on x=1..1,y=1..1,z=1..1'], 1],
+
+    [['off x=1..1,y=1..1,z=1..1'], 0],
   ])('%s => %d', (steps, on) => {
     const reactor = Reactor().execute(steps);
 
