@@ -25,7 +25,9 @@ function Player(position, score = 0) {
   return {position, score, advance}
 }
 
+let gameCounter = 0
 function Game({player1, player2, winningScore, turn = 0}) {
+  const id = gameCounter++;
   const player1Up = turn % 2 === 0;
   const player1Wins = player1.score >= winningScore;
   const player2Wins = player2.score >= winningScore;
@@ -52,22 +54,41 @@ function Game({player1, player2, winningScore, turn = 0}) {
   };
 
   return {
+    id,
     player1,
     player2,
     move,
     winner,
+    player1Wins,
+    player2Wins,
     turn
   };
 }
 
 function DiracDie() {
-  return {
-    moveUntilWin: () => {
-      return {
-        player1: 444356092776315,
-        player2: 341960390180808,
-      }
+  const split = game => [game.move(1), game.move(2), game.move(3)];
+
+  function recurse({games, state = {player1: 0, player2: 0}}) {
+    if(games.length === 0) {
+      return {games, state}
     }
+
+    const newState = {
+      player1: state.player1 + games.filter(g => g.player1Wins).length,
+      player2: state.player2 + games.filter(g => g.player2Wins).length
+    };
+
+    const nextGeneration = _(games)
+      .filter(game => !game.winner)
+      .map(split)
+      .flatten()
+      .value()
+
+    return recurse({games: nextGeneration, state: newState})
+  }
+
+  return {
+    moveUntilWin: (game) => recurse({games: [game]}).state
   };
 }
 
@@ -153,12 +174,12 @@ describe('Dirac Game', () => {
   describe('Dirac Dice', () => {
     let game, die;
     beforeEach(() => {
-      const player1 = Player(8);
-      const player2 = Player(6);
+      const player1 = Player(4);
+      const player2 = Player(8);
       game = Game({player1, player2, winningScore: 21})
       die = DiracDie()
     })
-    test('one turn', () => {
+    xtest('one turn', () => {
       expect(die.moveUntilWin(game)).toMatchObject({
         player1: 444356092776315,
         player2: 341960390180808,
