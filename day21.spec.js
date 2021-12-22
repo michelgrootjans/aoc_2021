@@ -1,24 +1,18 @@
 const _ = require('lodash')
 
-function FixedDie(roll) {
-  return {
-    roll: (times = 1) => roll * times
-  };
-}
-
 function DeterministicDie(sides) {
   let index = 0;
   const rollOnce = () => (index++) % sides + 1;
   const roll = (numberOfRolls = 1) => _(_.times(numberOfRolls, rollOnce)).sum();
 
-  const move = game => {
-    return game.move(roll(3));
-  }
+  const move = game => game.move(roll(3));
 
-  return {
-    roll,
-    move
+  const moveUntilWin = (game, winningScore) => {
+    if (game.winner(winningScore)) return game;
+    return moveUntilWin(move(game), winningScore);
   };
+
+  return {roll, move, moveUntilWin};
 }
 
 function Player(position, score = 0) {
@@ -134,7 +128,8 @@ describe('Dirac Game', () => {
       })
     });
     test('move until win', () => {
-      expect(game.moveUntilWin()).toMatchObject({
+      game = die.moveUntilWin(game, 1000)
+      expect(game).toMatchObject({
         player1: {position: 10, score: 1000},
         player2: {position: 3, score: 745},
       })
