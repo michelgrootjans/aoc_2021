@@ -9,7 +9,7 @@ function DeterministicDie(sides) {
 
   const moveUntilWin = (game, winningScore) => {
     if (game.winner) return game;
-    if (game.turn > 2000) throw 'too many moves'
+    if (game.turn > 2000) throw 'too many moves, probably stuck in an endless looop'
     return moveUntilWin(move(game), winningScore);
   };
 
