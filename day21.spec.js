@@ -21,11 +21,7 @@ function Player(position, score = 0) {
     return Player(newPosition, score + newPosition);
   };
 
-  return {
-    position,
-    score,
-    advance,
-  }
+  return {position, score, advance}
 }
 
 function Game({die, player1, player2, turn = 0}) {
@@ -136,15 +132,16 @@ describe('Dirac Game', () => {
     });
   });
   describe('my input', () => {
-    let game;
+    let die, game;
     beforeEach(() => {
-      const die = DeterministicDie(100);
+      die = DeterministicDie(100);
       const player1 = Player(8);
       const player2 = Player(6);
       game = Game({die, player1, player2});
     })
     test('move until win', () => {
-      expect(game.moveUntilWin(1000)).toMatchObject({
+      game = die.moveUntilWin(game, 1000);
+      expect(game).toMatchObject({
           player1: {position: 8, score: 1000},
           player2: {position: 4, score: 674},
           turn: 249
