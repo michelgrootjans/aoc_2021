@@ -1,7 +1,11 @@
 const _ = require('lodash')
 
 function Cube([x, y, z]) {
-  return {x, y, z};
+  const description = `(${x},${y},${z})`
+  return {
+    x, y, z,
+    description
+  };
 }
 
 function* permutations(head, ...tail) {
@@ -33,12 +37,11 @@ function Cuboid(description) {
     }
 
     return {
-      apply: cubes => _([...cubes, ...newCubes])
-        .uniqBy(c => {
-          const kabloom = [c.x, c.y, c.z].join(',');
-          return kabloom;
-        })
-        .value()
+      apply: cubes => {
+        return _([...cubes, ...newCubes])
+          .uniqBy(c => c.description)
+          .value();
+      }
     };
   }
 
