@@ -7,10 +7,10 @@ function DeterministicDie(sides) {
 
   const move = game => game.move(roll(3));
 
-  const moveUntilWin = (game, winningScore) => {
+  const moveUntilWin = (game) => {
     if (game.winner) return game;
     if (game.turn > 2000) throw 'too many moves, probably stuck in an endless looop'
-    return moveUntilWin(move(game), winningScore);
+    return moveUntilWin(move(game));
   };
 
   return {roll, move, moveUntilWin};
@@ -51,17 +51,6 @@ function Game({player1, player2, winningScore, turn = 0}) {
     })
   };
 
-  const moveUntilWin = () => {
-    let game = move()
-    let iterations = 0;
-    while (!game.winner) {
-      iterations++;
-      if (iterations > 1000) throw 'took too long'
-      game = game.move();
-    }
-    return game;
-  };
-
   return {
     player1,
     player2,
@@ -69,6 +58,10 @@ function Game({player1, player2, winningScore, turn = 0}) {
     winner,
     turn
   };
+}
+
+function DiracDie() {
+  return undefined;
 }
 
 describe('Dirac Game', () => {
@@ -125,7 +118,7 @@ describe('Dirac Game', () => {
       })
     });
     test('move until win', () => {
-      game = die.moveUntilWin(game, 1000)
+      game = die.moveUntilWin(game)
       expect(game).toMatchObject({
         player1: {position: 10, score: 1000},
         player2: {position: 3, score: 745},
@@ -141,7 +134,7 @@ describe('Dirac Game', () => {
       game = Game({player1, player2, winningScore: 1000});
     })
     test('move until win', () => {
-      game = die.moveUntilWin(game, 1000);
+      game = die.moveUntilWin(game);
       expect(game).toMatchObject({
           player1: {position: 8, score: 1000},
           player2: {position: 4, score: 674},
@@ -151,10 +144,12 @@ describe('Dirac Game', () => {
     });
   });
   describe('Dirac Dice', () => {
-    let game;
+    let game, die;
     beforeEach(() => {
       const player1 = Player(8);
       const player2 = Player(6);
+      const game = Game({player1, player2, winningScore: 21})
+      const die = DiracDie()
     })
     test('one turn', () => {
 
