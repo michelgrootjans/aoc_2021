@@ -13,10 +13,6 @@ function* permutations(head, ...tail) {
   for (let r of remainder) for (let h of head) yield [h, ...r];
 }
 
-// for (let c of permutations([10, 11, 12], [10, 11, 12], [10, 11, 12])) {
-//   console.log(...c);
-// }
-
 function Cuboid(description) {
   function getSide(side) {
     const min = side[0];
@@ -60,12 +56,9 @@ function Reactor(cubes = []) {
 
   const execute = ([head, ...tail]) => {
     if (!head) return Reactor(cubes);
-
-    const newCubes = step(head, cubes)
-
-
-    return Reactor(newCubes)
+    return Reactor(step(head, cubes)).execute(tail)
   };
+
   return {
     on: cubes.length,
     execute
@@ -81,6 +74,8 @@ describe('Reactor Reboot', () => {
     [['on x=1..1,y=1..1,z=1..1'], 1],
     [['on x=1..2,y=1..3,z=1..4'], 2 * 3 * 4],
     [['on x=10..12,y=10..12,z=10..12'], 3 * 3 * 3],
+    [['on x=1..1,y=1..1,z=1..1', 'on x=2..2,y=2..2,z=2..2'], 2],
+    [['on x=1..1,y=1..1,z=1..1', 'on x=1..1,y=1..1,z=1..1'], 1],
   ])('%s => %d', (steps, on) => {
     const reactor = Reactor().execute(steps);
 
