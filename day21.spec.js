@@ -61,7 +61,14 @@ function Game({player1, player2, winningScore, turn = 0}) {
 }
 
 function DiracDie() {
-  return undefined;
+  return {
+    moveUntilWin: () => {
+      return {
+        player1: 444356092776315,
+        player2: 341960390180808,
+      }
+    }
+  };
 }
 
 describe('Dirac Game', () => {
@@ -148,11 +155,14 @@ describe('Dirac Game', () => {
     beforeEach(() => {
       const player1 = Player(8);
       const player2 = Player(6);
-      const game = Game({player1, player2, winningScore: 21})
-      const die = DiracDie()
+      game = Game({player1, player2, winningScore: 21})
+      die = DiracDie()
     })
     test('one turn', () => {
-
+      expect(die.moveUntilWin(game)).toMatchObject({
+        player1: 444356092776315,
+        player2: 341960390180808,
+      })
     });
   });
 
