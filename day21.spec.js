@@ -125,7 +125,10 @@ describe('Dirac Game', () => {
       })
     });
     test('move 3 times', () => {
-      expect(game.move().move().move()).toMatchObject({
+      game = die.move(game)
+      game = die.move(game)
+      game = die.move(game)
+      expect(game).toMatchObject({
         player1: {position: 4, score: 10 + 4},
         player2: {position: 3, score: 3},
       })
