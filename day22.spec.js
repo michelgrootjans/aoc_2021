@@ -4,7 +4,8 @@ function Cube([x, y, z]) {
   const description = `(${x},${y},${z})`
   return {
     x, y, z,
-    description
+    description,
+    matches: other => x === other.x && y === other.y && z === other.z,
   };
 }
 
@@ -39,7 +40,14 @@ function Cuboid(description) {
     };
 
     const subtract = cubes => {
-      return [];
+      function inside(cube) {
+        return newCubes.some(newCube => newCube.matches(cube))
+      }
+      function outside(cube) {
+        return !inside(cube)
+      }
+
+      return cubes.filter(c => outside(c));
     };
 
     return {
@@ -82,9 +90,33 @@ describe('Reactor Reboot', () => {
     [['on x=1..1,y=1..1,z=1..1', 'on x=1..1,y=1..1,z=1..1'], 1],
 
     [['off x=1..1,y=1..1,z=1..1'], 0],
-  ])('%s => %d', (steps, on) => {
-    const reactor = Reactor().execute(steps);
 
-    expect(reactor).toMatchObject({on});
+    [['on x=1..1,y=1..1,z=1..1', 'off x=1..1,y=1..1,z=1..1'], 0],
+    [['on x=1..1,y=1..1,z=1..1', 'off x=2..2,y=2..2,z=2..2'], 1],
+
+    //aoc example
+    [[
+      'on x=10..12,y=10..12,z=10..12',
+    ], 27],
+    [[
+      'on x=10..12,y=10..12,z=10..12',
+      'on x=11..13,y=11..13,z=11..13',
+    ], 46],
+    [[
+      'on x=10..12,y=10..12,z=10..12',
+      'on x=11..13,y=11..13,z=11..13',
+      'off x=9..11,y=9..11,z=9..11',
+    ], 38],
+    [[
+      'on x=10..12,y=10..12,z=10..12',
+      'on x=11..13,y=11..13,z=11..13',
+      'off x=9..11,y=9..11,z=9..11',
+      'on x=10..10,y=10..10,z=10..10',
+    ], 39],
+  ])('%s => %d', (steps, on) => {
+    expect(Reactor().execute(steps)).toMatchObject({on});
+  });
+  xtest('my input', () => {
+    expect(Reactor().execute(require('./day22.input'))).toMatchObject({on: 0});
   });
 });
